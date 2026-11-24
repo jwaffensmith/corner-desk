@@ -1,17 +1,27 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Box, Button, Card, Flex, Heading, Label, Text } from "theme-ui";
+import { Box, Button, Card, Flex, Grid, Heading, Label, Text } from "theme-ui";
 import {
   type Week, formatMinutes, useAdvance, useCreateAssignment, useCurrent, useTracks,
 } from "../api";
 import desk from "../assets/desk.png";
 import { Dialog } from "../components/Dialog";
 import { Meter } from "../components/Meter";
+import { WeekTodos } from "../todos/WeekTodos";
 import { AssignmentDrawer } from "./AssignmentDrawer";
 import { AssignmentForm } from "./AssignmentForm";
 import { AssignmentRow } from "./AssignmentRow";
 
 export function ThisWeek() {
+  return (
+    <Grid sx={{ gridTemplateColumns: ["minmax(0, 1fr)", null, "minmax(0, 1fr) 264px"], gap: 5, alignItems: "start" }}>
+      <WeekPlan />
+      <WeekTodos />
+    </Grid>
+  );
+}
+
+function WeekPlan() {
   const current = useCurrent();
   const tracks = useTracks();
   const createAssignment = useCreateAssignment();

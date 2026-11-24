@@ -1,16 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { Box, Button, Flex, Input, Label, Text } from "theme-ui";
-import { type Todo, errorMessage, useCreateTodo, useDeleteTodo, useUpdateTodo } from "../api";
+import { type Todo, errorMessage, useCreateTodo, useDeleteTodo, useTodos, useUpdateTodo } from "../api";
 import { Dialog } from "../components/Dialog";
 import { TextArea } from "../components/TextArea";
 
-interface Props {
-  todo?: Todo;
-  categories: string[];
-  onClose: () => void;
-}
-
-export function TodoDialog({ todo, categories, onClose }: Props) {
+export function TodoDialog({ todo, onClose }: { todo?: Todo; onClose: () => void }) {
+  const categories = [...new Set((useTodos().data ?? []).flatMap((t) => t.category ?? []))].sort();
   const create = useCreateTodo();
   const update = useUpdateTodo();
   const remove = useDeleteTodo();

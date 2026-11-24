@@ -1,10 +1,10 @@
-import { Fragment, useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Box, Button, Card, Flex, Heading, Text } from "theme-ui";
-import { type Todo, useTodos, useUpdateTodo } from "../api";
+import { type Todo, useTodos } from "../api";
 import { ListSection } from "../components/ListSection";
-import { RowButton } from "../components/RowButton";
-import { dayOf, endOfWeek, formatDay, today } from "../lib/dates";
+import { dueThisWeek } from "../lib/dates";
 import { TodoDialog } from "./TodoDialog";
+import { TodoRow } from "./TodoRow";
 
 export function Todos() {
   const todos = useTodos();
@@ -14,15 +14,13 @@ export function Todos() {
   if (todos.isError) return <Text role="alert">Couldn't load your to-dos. Is the API running?</Text>;
   if (!todos.data) return <Text>Loading…</Text>;
 
-  const weekEnd = endOfWeek(today());
   const open = todos.data.filter((t) => !t.completedAt);
   const done = todos.data.filter((t) => t.completedAt);
   const sections: [string, Todo[]][] = [
-    ["This week", open.filter((t) => t.dueDate && t.dueDate <= weekEnd)],
-    ["Later", open.filter((t) => t.dueDate && t.dueDate > weekEnd)],
+    ["This week", open.filter((t) => dueThisWeek(t.dueDate))],
+    ["Later", open.filter((t) => t.dueDate && !dueThisWeek(t.dueDate))],
     ["Anytime", open.filter((t) => !t.dueDate)],
   ];
-  const categories = [...new Set(todos.data.flatMap((t) => t.category ?? []))].sort();
   const editing = todos.data.find((t) => t.id === openId);
   const rows = (items: Todo[]) => items.map((t) => <TodoRow key={t.id} todo={t} onOpen={() => setOpenId(t.id)} />);
 
@@ -55,43 +53,8 @@ export function Todos() {
         </details>
       )}
 
-      {adding && <TodoDialog categories={categories} onClose={() => setAdding(false)} />}
-      {editing && <TodoDialog key={editing.id} todo={editing} categories={categories} onClose={() => setOpenId(null)} />}
-    </Flex>
-  );
-}
-
-function due(day: string): ReactNode {
-  const now = today();
-  if (day < now) return <Text sx={{ color: "alert" }}>Was due {formatDay(day)}</Text>;
-  return day === now ? "Due today" : `Due ${formatDay(day)}`;
-}
-
-function TodoRow({ todo: t, onOpen }: { todo: Todo; onOpen: () => void }) {
-  const update = useUpdateTodo();
-  const done = Boolean(t.completedAt);
-  const meta = [
-    t.completedAt ? `Done ${formatDay(dayOf(t.completedAt))}` : t.dueDate && due(t.dueDate),
-    t.category,
-    t.repeatsWeekly && "Repeats weekly",
-  ].filter(Boolean);
-
-  return (
-    <Flex as="li" sx={{ alignItems: "center", gap: 3, py: 2, borderTop: "1px solid", borderColor: "muted" }}>
-      <input
-        type="checkbox"
-        checked={done}
-        aria-label={`Mark "${t.title}" done`}
-        onChange={() => update.mutate({ id: t.id, completed: !done })}
-        sx={{ width: 20, height: 20, flexShrink: 0, cursor: "pointer" }}
-      />
-      <RowButton
-        title={t.title}
-        dimmed={done}
-        struck={done}
-        onClick={onOpen}
-        meta={meta.length > 0 && meta.map((part, i) => <Fragment key={i}>{i > 0 && " · "}{part}</Fragment>)}
-      />
+      {adding && <TodoDialog onClose={() => setAdding(false)} />}
+      {editing && <TodoDialog key={editing.id} todo={editing} onClose={() => setOpenId(null)} />}
     </Flex>
   );
 }

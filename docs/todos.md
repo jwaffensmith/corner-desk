@@ -37,3 +37,7 @@ An account can hold 300 open to-dos (`LIMITS` in `shared`).
 
 `/todos` groups open to-dos into "This week" (due by Sunday, including anything past due),
 "Later", and "Anytime" (no date), with recently finished ones folded away below.
+
+The "This week" group also sits beside the curriculum on `/prep` as a sidebar (below it on
+narrow screens). To-dos finished since Monday stay there, struck through, so the week's
+count reads as progress.

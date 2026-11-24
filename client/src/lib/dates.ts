@@ -30,9 +30,15 @@ export function monthsThrough(last: string, count: number): string[] {
   return Array.from({ length: count }, (_, i) => toDay(new Date(year, month - count + i, 1)).slice(0, 7));
 }
 
-// Weeks run Monday to Sunday.
-export function endOfWeek(day: string): string {
+function shift(day: string, days: number): string {
   const date = parse(day);
-  date.setDate(date.getDate() + ((7 - date.getDay()) % 7));
+  date.setDate(date.getDate() + days);
   return toDay(date);
 }
+
+// Weeks run Monday to Sunday.
+const endOfWeek = (day: string) => shift(day, (7 - parse(day).getDay()) % 7);
+export const startOfThisWeek = () => shift(endOfWeek(today()), -6);
+
+// Anything already past due still belongs to this week.
+export const dueThisWeek = (day: string | null) => day !== null && day <= endOfWeek(today());

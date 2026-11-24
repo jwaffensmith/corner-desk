@@ -5,6 +5,7 @@ import {
   useReorderWeeks, useTracks, useUpdateWeek, useWeeks,
 } from "../api";
 import { Dialog } from "../components/Dialog";
+import { Menu } from "../components/Menu";
 import { AssignmentDrawer } from "./AssignmentDrawer";
 import { AssignmentForm } from "./AssignmentForm";
 import { AssignmentRow } from "./AssignmentRow";
@@ -49,8 +50,14 @@ export function Curriculum() {
         <Heading as="h1" sx={{ fontSize: 5 }}>Curriculum</Heading>
         <Flex sx={{ gap: 2, flexWrap: "wrap" }}>
           <Button variant="secondary" onClick={() => setImporting(true)}>Import JSON</Button>
-          <Button variant="secondary" disabled={!weeks.data.length} onClick={() => downloadExport(false)}>Export plan</Button>
-          <Button variant="secondary" disabled={!weeks.data.length} onClick={() => downloadExport(true)}>Export backup</Button>
+          <Menu
+            label="Export"
+            disabled={!weeks.data.length}
+            items={[
+              { label: "Plan only", hint: "Weeks and assignments, no progress", onSelect: () => downloadExport(false) },
+              { label: "Full backup", hint: "Includes status, time, confidence, and notes", onSelect: () => downloadExport(true) },
+            ]}
+          />
           <Button onClick={() => createWeek.mutate({})}>Add week</Button>
         </Flex>
       </Flex>

@@ -9,7 +9,9 @@ const minutes = z.coerce.number().int().min(0);
 const rating = z.coerce.number().int().min(1).max(5);
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens");
 
-export const LIMITS = { weeks: 104, assignmentsPerWeek: 50, tracks: 20 } as const;
+const day = z.iso.date();
+
+export const LIMITS = { weeks: 104, assignmentsPerWeek: 50, tracks: 20, events: 500 } as const;
 
 export const resourceSchema = z.object({
   title: nonEmpty,
@@ -119,6 +121,23 @@ export const curriculumSchema = z.object({
   });
 });
 
+export const eventStatusEnum = z.enum(["REGISTERED", "ATTENDED", "SKIPPED"]);
+export type EventStatus = z.infer<typeof eventStatusEnum>;
+
+export const eventCreateSchema = z.object({
+  name: nonEmpty,
+  date: day,
+  location: optText,
+  url: z.httpUrl().nullish(),
+  notes: optText,
+  status: eventStatusEnum.optional(),
+});
+export const eventUpdateSchema = eventCreateSchema.partial();
+
+export const networkingSettingsSchema = z.object({
+  eventsPerMonth: z.coerce.number().int().min(1).max(31),
+});
+
 export type TrackCreate = z.infer<typeof trackCreateSchema>;
 export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;
 export type WeekCreate = z.infer<typeof weekCreateSchema>;
@@ -126,3 +145,5 @@ export type WeekUpdate = z.infer<typeof weekUpdateSchema>;
 export type AssignmentCreate = z.infer<typeof assignmentCreateSchema>;
 export type AssignmentUpdate = z.infer<typeof assignmentUpdateSchema>;
 export type Curriculum = z.infer<typeof curriculumSchema>;
+export type EventCreate = z.infer<typeof eventCreateSchema>;
+export type EventUpdate = z.infer<typeof eventUpdateSchema>;

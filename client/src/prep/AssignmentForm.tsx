@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Box, Button, Flex, Input, Label, Select, Text } from "theme-ui";
 import { TextArea } from "../components/TextArea";
 import type { AssignmentCreate } from "@cornerdesk/shared";
-import { ApiError, type Assignment, type Track } from "../api";
+import { type Assignment, type Track, errorMessage } from "../api";
 
 type Content = Omit<AssignmentCreate, "weekId">;
 
@@ -43,8 +43,7 @@ export function AssignmentForm({ tracks, initial, submitLabel, onSubmit, onCance
         }),
       });
     } catch (err) {
-      const fields = err instanceof ApiError ? Object.values(err.fields ?? {}) : [];
-      setError(fields.length ? fields.join(". ") : (err as Error).message);
+      setError(errorMessage(err));
     }
   }
 

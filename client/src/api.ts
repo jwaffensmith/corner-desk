@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
-  AssignmentCreate, AssignmentStatus, AssignmentUpdate, Resource, WeekCreate, WeekUpdate,
+  AssignmentCreate, AssignmentStatus, AssignmentUpdate, EventCreate, EventStatus, EventUpdate, Resource, WeekCreate,
+  WeekUpdate,
 } from "@cornerdesk/shared";
 
 export interface Track {
@@ -74,6 +75,21 @@ export interface ImportResult {
   };
 }
 
+export interface NetworkingEvent {
+  id: string;
+  name: string;
+  date: string;
+  location: string | null;
+  url: string | null;
+  notes: string | null;
+  status: EventStatus;
+}
+
+export interface Networking {
+  eventsPerMonth: number;
+  events: NetworkingEvent[];
+}
+
 export class ApiError extends Error {
   constructor(readonly status: number, message: string, readonly fields?: Record<string, string>) {
     super(message);
@@ -94,6 +110,11 @@ export async function api<T>(path: string, method = "GET", body?: unknown): Prom
     throw new ApiError(res.status, json?.error?.message ?? "Something went wrong", json?.error?.fields);
   }
   return json as T;
+}
+
+export function errorMessage(err: unknown): string {
+  const fields = err instanceof ApiError ? Object.values(err.fields ?? {}) : [];
+  return fields.length ? fields.join(". ") : (err as Error).message;
 }
 
 export const useTracks = () => useQuery({ queryKey: ["tracks"], queryFn: () => api<Track[]>("/tracks"), staleTime: Infinity });
@@ -155,6 +176,17 @@ export const useAdvance = () =>
 export const useImport = () =>
   useApiMutation(({ file, dryRun }: { file: unknown; dryRun: boolean }) =>
     api<ImportResult>(`/curriculum/import?dryRun=${dryRun}`, "POST", file));
+
+export const useNetworking = () =>
+  useQuery({ queryKey: ["networking"], queryFn: () => api<Networking>("/networking") });
+export const useCreateEvent = () =>
+  useApiMutation((body: EventCreate) => api<NetworkingEvent>("/networking/events", "POST", body));
+export const useUpdateEvent = () =>
+  useApiMutation(({ id, ...body }: EventUpdate & { id: string }) =>
+    api<NetworkingEvent>(`/networking/events/${id}`, "PATCH", body));
+export const useDeleteEvent = () => useApiMutation((id: string) => api(`/networking/events/${id}`, "DELETE"));
+export const useUpdateNetworkingGoal = () =>
+  useApiMutation((eventsPerMonth: number) => api("/networking/settings", "PATCH", { eventsPerMonth }));
 
 export const formatMinutes = (min: number) =>
   min < 60 ? `${min} min` : `${Math.round((min / 60) * 10) / 10} h`;

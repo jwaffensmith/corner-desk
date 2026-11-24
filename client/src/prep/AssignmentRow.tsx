@@ -1,5 +1,6 @@
-import { Box, Button, Flex, Text } from "theme-ui";
+import { Button, Flex } from "theme-ui";
 import { type Assignment, formatMinutes, useUpdateAssignment } from "../api";
+import { RowButton } from "../components/RowButton";
 
 interface Props {
   assignment: Assignment;
@@ -22,25 +23,15 @@ export function AssignmentRow({ assignment: a, trackName, onOpen, onMove }: Prop
         onChange={() => update.mutate({ id: a.id, status: done ? "TODO" : "DONE" })}
         sx={{ width: 20, height: 20, flexShrink: 0, cursor: "pointer" }}
       />
-      <Box
-        as="button"
+      <RowButton
+        title={a.title}
+        dimmed={done || skipped}
+        struck={done}
         onClick={onOpen}
-        sx={{
-          flex: 1, minWidth: 0, textAlign: "left", bg: "transparent", border: 0, p: 1, borderRadius: "sm",
-          font: "inherit", color: "inherit", cursor: "pointer",
-          "&:hover": { bg: "muted" },
-          "&:focus-visible": { outline: "2px solid", outlineColor: "accent" },
-        }}
-      >
-        <Text sx={{ display: "block", color: done || skipped ? "secondary" : "text", textDecoration: done ? "line-through" : "none" }}>
-          {a.title}
-        </Text>
-        <Text variant="meta">
-          {[trackName, formatMinutes(a.actualMin ?? a.estimatedMin), skipped && "Skipped", a.isSupplementary && "Extra"]
-            .filter(Boolean)
-            .join(" · ")}
-        </Text>
-      </Box>
+        meta={[trackName, formatMinutes(a.actualMin ?? a.estimatedMin), skipped && "Skipped", a.isSupplementary && "Extra"]
+          .filter(Boolean)
+          .join(" · ")}
+      />
       {onMove && (
         <Flex>
           <Button variant="ghost" aria-label={`Move "${a.title}" up`} onClick={() => onMove(-1)}>↑</Button>

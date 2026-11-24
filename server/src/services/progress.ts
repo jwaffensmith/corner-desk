@@ -1,4 +1,5 @@
 import type { AssignmentStatus } from "@cornerdesk/shared";
+import { localDate } from "../lib/dates.js";
 
 interface TrackInput {
   id: string;
@@ -28,11 +29,6 @@ export function startOfWeek(date: Date): Date {
   d.setHours(0, 0, 0, 0);
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
   return d;
-}
-
-function localDate(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 // Skipped assignments leave the plan rather than counting as unfinished.

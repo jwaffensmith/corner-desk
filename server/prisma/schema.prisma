@@ -20,6 +20,8 @@ model User {
   tracks        Track[]
   weeks         Week[]
   settings      PrepSettings?
+  networking    NetworkingSettings?
+  events        NetworkingEvent[]
 }
 
 model Session {
@@ -141,5 +143,33 @@ model Assignment {
 enum AssignmentStatus {
   TODO
   DONE
+  SKIPPED
+}
+
+model NetworkingSettings {
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String @id
+  eventsPerMonth Int    @default(1)
+}
+
+model NetworkingEvent {
+  id        String      @id @default(cuid())
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  name      String
+  date      DateTime    @db.Date
+  location  String?
+  url       String?
+  notes     String?
+  status    EventStatus @default(REGISTERED)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([userId, date])
+}
+
+enum EventStatus {
+  REGISTERED
+  ATTENDED
   SKIPPED
 }

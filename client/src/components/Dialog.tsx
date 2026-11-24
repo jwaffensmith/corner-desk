@@ -9,12 +9,12 @@ interface Props {
 }
 
 // The native modal <dialog> supplies the focus trap, Escape to close, and focus return.
+// No close() on cleanup: StrictMode's double effect would fire onClose and unmount it at once.
 export function Dialog({ title, onClose, drawer, children }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const el = ref.current!;
-    el.showModal();
-    return () => el.close();
+    if (!el.open) el.showModal();
   }, []);
 
   return (

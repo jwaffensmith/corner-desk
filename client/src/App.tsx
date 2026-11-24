@@ -42,10 +42,10 @@ export function App() {
             sx={{ columnGap: [3, 4], fontSize: [0, 1], flexWrap: "wrap", order: [1, 1, 0], flexBasis: ["100%", "100%", "auto"] }}
           >
             <NavLink to="/" end sx={linkStyle}>Dashboard</NavLink>
+            <NavLink to="/todos" sx={linkStyle}>To-do</NavLink>
             <NavLink to="/prep" end sx={linkStyle}>This week</NavLink>
             <NavLink to="/prep/curriculum" sx={linkStyle}>Curriculum</NavLink>
             <NavLink to="/networking" sx={linkStyle}>Networking</NavLink>
-            <NavLink to="/todos" sx={linkStyle}>To-do</NavLink>
           </Flex>
           <Button variant="ghost" title={session.data.user.email} onClick={signOut} sx={{ ml: "auto" }}>Sign out</Button>
         </Flex>

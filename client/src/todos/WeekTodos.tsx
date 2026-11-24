@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Card, Heading, Text } from "theme-ui";
 import { useTodos } from "../api";
+import { Loading } from "../components/Loading";
 import { dayOf, dueThisWeek, startOfThisWeek } from "../lib/dates";
 import { TodoDialog } from "./TodoDialog";
 import { TodoRow } from "./TodoRow";
@@ -43,8 +44,10 @@ export function WeekTodos() {
           <Box as="ul" sx={{ listStyle: "none", p: 0, m: 0, mt: 2, mb: 3 }}>
             {items.map((t) => <TodoRow key={t.id} todo={t} onOpen={() => setOpenId(t.id)} />)}
           </Box>
+        ) : todos.data ? (
+          <Text sx={{ display: "block", my: 3 }}>Nothing due this week.</Text>
         ) : (
-          <Text sx={{ display: "block", my: 3 }}>{todos.data ? "Nothing due this week." : "Loading…"}</Text>
+          <Loading layout="inline" />
         )}
 
         <Link to="/todos">All to-dos</Link>

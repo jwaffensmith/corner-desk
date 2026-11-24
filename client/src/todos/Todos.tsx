@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Box, Button, Card, Flex, Heading, Text } from "theme-ui";
 import { type Todo, useTodos } from "../api";
 import { ListSection } from "../components/ListSection";
+import { Loading } from "../components/Loading";
 import { dueThisWeek } from "../lib/dates";
 import { TodoDialog } from "./TodoDialog";
 import { TodoRow } from "./TodoRow";
@@ -13,7 +14,7 @@ export function Todos() {
   const [adding, setAdding] = useState(false);
 
   if (todos.isError) return <Text role="alert">Couldn't load your to-dos. Is the API running?</Text>;
-  if (!todos.data) return <Text>Loading…</Text>;
+  if (!todos.data) return <Loading />;
 
   // A project's undated improvements are its backlog and stay on the Portfolio page.
   const isBacklog = (t: Todo) => t.projectId !== null && !t.dueDate;

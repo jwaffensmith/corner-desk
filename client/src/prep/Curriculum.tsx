@@ -5,6 +5,7 @@ import {
   useReorderWeeks, useTracks, useUpdateWeek, useWeeks,
 } from "../api";
 import { Dialog } from "../components/Dialog";
+import { Loading } from "../components/Loading";
 import { Menu } from "../components/Menu";
 import { TextArea } from "../components/TextArea";
 import { AssignmentDrawer } from "./AssignmentDrawer";
@@ -39,7 +40,7 @@ export function Curriculum() {
   const [openId, setOpenId] = useState<string | null>(null);
 
   if (weeks.isError || tracks.isError) return <Text role="alert">Couldn't load the curriculum. Is the API running?</Text>;
-  if (!weeks.data || !tracks.data) return <Text>Loading…</Text>;
+  if (!weeks.data || !tracks.data) return <Loading />;
 
   const currentId = weeks.data.find((w) => !w.completedAt)?.id;
   const open = weeks.data.flatMap((w) => w.assignments).find((a) => a.id === openId);

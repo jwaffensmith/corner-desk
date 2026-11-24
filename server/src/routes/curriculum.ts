@@ -7,9 +7,9 @@ export const curriculumRouter = Router();
 
 curriculumRouter.post("/import", validate(curriculumSchema), async (req, res) => {
   const dryRun = req.query["dryRun"] === "true";
-  res.json({ dryRun, plan: await importCurriculum(req.body, dryRun) });
+  res.json({ dryRun, plan: await importCurriculum(req.userId, req.body, dryRun) });
 });
 
 curriculumRouter.get("/export", async (req, res) => {
-  res.json(await exportCurriculum(req.query["progress"] === "true"));
+  res.json(await exportCurriculum(req.userId, req.query["progress"] === "true"));
 });

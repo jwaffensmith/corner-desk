@@ -10,12 +10,13 @@
     "test:watch": "vitest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "claim-data": "tsx scripts/claim-data.ts"
   },
   "dependencies": {
     "@cornerdesk/shared": "*",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
+    "better-auth": "^1.7.27",
     "dotenv": "^18.0.5",
     "express": "^5.2.1",
     "zod": "^4.6.5"

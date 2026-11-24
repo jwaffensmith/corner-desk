@@ -1,6 +1,6 @@
-import { prisma } from "../src/db.js";
+import { prisma } from "../db.js";
 
-const TRACKS = [
+const DEFAULT_TRACKS = [
   {
     slug: "js-ts",
     name: "JavaScript & TypeScript Fundamentals",
@@ -30,16 +30,12 @@ const TRACKS = [
   },
 ];
 
-// Creates missing rows only, so re-running never overwrites edits made in the app.
-export async function seed(): Promise<void> {
-  for (const [sortOrder, track] of TRACKS.entries()) {
-    await prisma.track.upsert({ where: { slug: track.slug }, create: { ...track, sortOrder }, update: {} });
-  }
-  await prisma.prepSettings.upsert({ where: { id: 1 }, create: {}, update: {} });
-}
-
-if (process.argv[1]?.endsWith("seed.ts")) {
-  seed()
-    .then(() => console.log("Seeded tracks and settings."))
-    .finally(() => prisma.$disconnect());
+export async function provisionUser(userId: string): Promise<void> {
+  await prisma.$transaction([
+    prisma.track.createMany({
+      data: DEFAULT_TRACKS.map((track, sortOrder) => ({ ...track, userId, sortOrder })),
+      skipDuplicates: true,
+    }),
+    prisma.prepSettings.createMany({ data: [{ userId }], skipDuplicates: true }),
+  ]);
 }

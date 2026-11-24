@@ -7,22 +7,29 @@ import { advanceWeek, assignmentOrder, findCurrentWeek } from "../services/weeks
 
 export const prepRouter = Router();
 
-const getSettings = () => prisma.prepSettings.upsert({ where: { id: 1 }, create: {}, update: {} });
+const getSettings = (userId: string) =>
+  prisma.prepSettings.upsert({ where: { userId }, create: { userId }, update: {} });
 
-prepRouter.get("/settings", async (_req, res) => {
-  res.json(await getSettings());
+prepRouter.get("/settings", async (req, res) => {
+  res.json(await getSettings(req.userId));
 });
 
 prepRouter.patch("/settings", validate(settingsUpdateSchema), async (req, res) => {
-  res.json(await prisma.prepSettings.upsert({ where: { id: 1 }, create: req.body, update: req.body }));
+  const { userId } = req;
+  res.json(await prisma.prepSettings.upsert({
+    where: { userId },
+    create: { ...req.body, userId },
+    update: req.body,
+  }));
 });
 
-prepRouter.get("/current", async (_req, res) => {
+prepRouter.get("/current", async (req, res) => {
+  const { userId } = req;
   const [settings, current, totalWeeks, tracks] = await Promise.all([
-    getSettings(),
-    findCurrentWeek(),
-    prisma.week.count(),
-    prisma.track.findMany({ where: { countsTowardStudy: true }, select: { id: true } }),
+    getSettings(userId),
+    findCurrentWeek(userId),
+    prisma.week.count({ where: { userId } }),
+    prisma.track.findMany({ where: { userId, countsTowardStudy: true }, select: { id: true } }),
   ]);
   if (!current) {
     res.json({ week: null, totalWeeks, settings });
@@ -32,7 +39,7 @@ prepRouter.get("/current", async (_req, res) => {
   const [week, upcoming] = await Promise.all([
     prisma.week.findUniqueOrThrow({ where: { id: current.id }, include: { assignments: assignmentOrder } }),
     prisma.week.findFirst({
-      where: { number: { gte: current.number }, milestone: { not: null } },
+      where: { userId, number: { gte: current.number }, milestone: { not: null } },
       orderBy: { number: "asc" },
       select: { number: true, milestone: true },
     }),
@@ -53,15 +60,19 @@ prepRouter.get("/current", async (_req, res) => {
 });
 
 prepRouter.post("/advance", validate(advanceSchema), async (req, res) => {
-  res.json(await advanceWeek(req.body.carryOver));
+  res.json(await advanceWeek(req.userId, req.body.carryOver));
 });
 
-prepRouter.get("/progress", async (_req, res) => {
+prepRouter.get("/progress", async (req, res) => {
+  const { userId } = req;
   const [settings, tracks, assignments, weeks] = await Promise.all([
-    getSettings(),
-    prisma.track.findMany({ orderBy: { sortOrder: "asc" } }),
-    prisma.assignment.findMany({ select: { trackId: true, status: true, actualMin: true, completedAt: true } }),
-    prisma.week.findMany({ select: { completedAt: true } }),
+    getSettings(userId),
+    prisma.track.findMany({ where: { userId }, orderBy: { sortOrder: "asc" } }),
+    prisma.assignment.findMany({
+      where: { userId },
+      select: { trackId: true, status: true, actualMin: true, completedAt: true },
+    }),
+    prisma.week.findMany({ where: { userId }, select: { completedAt: true } }),
   ]);
   res.json(summarizeProgress({ tracks, assignments, weeks, targetHours: settings.targetHours, now: new Date() }));
 });

@@ -7,28 +7,96 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id            String        @id
+  name          String
+  email         String        @unique
+  emailVerified Boolean       @default(false)
+  image         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  tracks        Track[]
+  weeks         Week[]
+  settings      PrepSettings?
+}
+
+model Session {
+  id        String   @id
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
 model Track {
   id                String       @id @default(cuid())
-  slug              String       @unique
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  slug              String
   name              String
   description       String?
   weeklyTargetMin   Int          @default(45)
   countsTowardStudy Boolean      @default(true)
   sortOrder         Int
   assignments       Assignment[]
+
+  @@unique([userId, slug])
+  @@unique([id, userId])
 }
 
 model PrepSettings {
-  id               Int @id @default(1)
-  targetHours      Int @default(100)
-  weeklyTargetMin  Int @default(180)
-  weeklyStretchMin Int @default(240)
-  assessmentEvery  Int @default(4)
+  user             User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String @id
+  targetHours      Int    @default(100)
+  weeklyTargetMin  Int    @default(180)
+  weeklyStretchMin Int    @default(240)
+  assessmentEvery  Int    @default(4)
 }
 
 model Week {
   id          String       @id @default(cuid())
-  number      Int          @unique
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  number      Int
   title       String?
   milestone   String?
   notes       String?
@@ -36,14 +104,20 @@ model Week {
   assignments Assignment[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+
+  @@unique([userId, number])
+  @@unique([id, userId])
 }
 
 model Assignment {
   id              String           @id @default(cuid())
-  key             String           @unique
-  week            Week             @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  // userId is part of both foreign keys, so an assignment's week and track always
+  // belong to the same user as the assignment.
+  userId          String
+  key             String
+  week            Week             @relation(fields: [weekId, userId], references: [id, userId], onDelete: Cascade)
   weekId          String
-  track           Track            @relation(fields: [trackId], references: [id], onDelete: Restrict)
+  track           Track            @relation(fields: [trackId, userId], references: [id, userId], onDelete: Restrict)
   trackId         String
   title           String
   description     String?
@@ -60,6 +134,7 @@ model Assignment {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 
+  @@unique([userId, key])
   @@index([weekId, sortOrder])
 }
 

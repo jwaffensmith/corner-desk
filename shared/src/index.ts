@@ -9,6 +9,8 @@ const minutes = z.coerce.number().int().min(0);
 const rating = z.coerce.number().int().min(1).max(5);
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens");
 
+export const LIMITS = { weeks: 104, assignmentsPerWeek: 50, tracks: 20 } as const;
+
 export const resourceSchema = z.object({
   title: nonEmpty,
   url: z.url(),
@@ -83,7 +85,7 @@ const progressSchema = z.object({
 export const curriculumSchema = z.object({
   settings: settingsUpdateSchema.optional(),
   weeks: z.array(z.object({
-    number: z.number().int().min(1),
+    number: z.number().int().min(1).max(LIMITS.weeks),
     title: optText,
     milestone: optText,
     notes: optText,
@@ -98,8 +100,8 @@ export const curriculumSchema = z.object({
       resources: z.array(resourceSchema).default([]),
       isSupplementary: z.boolean().optional(),
       progress: progressSchema.optional(),
-    })).default([]),
-  })),
+    })).max(LIMITS.assignmentsPerWeek).default([]),
+  })).max(LIMITS.weeks),
 }).superRefine((file, ctx) => {
   const numbers = new Set<number>();
   const keys = new Set<string>();

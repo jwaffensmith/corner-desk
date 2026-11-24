@@ -1,7 +1,7 @@
 # Interview Prep
 
 A self-paced, eight-month curriculum across five parallel learning tracks, with honest
-progress tracking. Single user, localhost only.
+progress tracking. Each account has its own tracks, curriculum, and progress.
 
 ## Decisions
 
@@ -12,21 +12,41 @@ progress tracking. Single user, localhost only.
 | Completion | `TODO` / `DONE` / `SKIPPED` | Completion records that the work happened. Proficiency is measured separately (confidence now; assessments later). Skipping removes an assignment from the plan instead of leaving it unfinished. |
 | Time | `actualMin` per assignment | Checking off fills it with the estimate if empty, so one click still counts. Weekly consistency is approximated from completion dates. |
 | Curriculum | Imported as JSON, never hardcoded | The curriculum is written and refined outside the app. |
+| Sign-in | OAuth only, through Better Auth | No passwords to store or reset, and the provider has already verified the email. |
 
 ## Data model
 
-- **Track**: slug, name, weekly target, `countsTowardStudy`, order. Five are seeded by `prisma/seed.ts`.
-- **PrepSettings**: a single row holding the hours target (100), weekly target and stretch (180 / 240 min), and assessment cadence (4 weeks).
-- **Week**: `number` (unique, always contiguous from 1), title, milestone, notes, `completedAt`.
+Every row belongs to a user, and slugs, week numbers, and assignment keys are unique per user.
+
+- **User**, **Session**, **Account**, **Verification**: owned by Better Auth.
+- **Track**: slug, name, weekly target, `countsTowardStudy`, order. A new account gets five (`services/provision.ts`).
+- **PrepSettings**: one row per user holding the hours target (100), weekly target and stretch (180 / 240 min), and assessment cadence (4 weeks).
+- **Week**: `number` (always contiguous from 1), title, milestone, notes, `completedAt`.
 - **Assignment**: a stable `key`; content fields (title, description, objectives, estimate, resources); progress fields (status, `completedAt`, `actualMin`, confidence 1–5, notes); `isSupplementary`.
 
 An assignment "has progress" when it is done, or has time, confidence, or notes logged.
 Deletes that would lose progress return `409` unless `?force=true`.
 
+## Accounts
+
+Sign-in is OAuth through [Better Auth](https://www.better-auth.com), mounted at `/api/auth/*`.
+Every other `/api` route except `/api/health` and `/api/config` needs a session and only
+sees the signed-in user's rows. Assignment foreign keys include `userId`, so the database
+itself refuses an assignment whose week or track belongs to someone else.
+
+- **Providers.** Google and GitHub, each enabled by setting its `*_CLIENT_ID` and
+  `*_CLIENT_SECRET` (see `.env.example`). Register `<BETTER_AUTH_URL>/api/auth/callback/<provider>`
+  as the callback URL. To add another, append it to `PROVIDERS` in `server/src/auth.ts`.
+- **Invite list.** `ALLOWED_EMAILS` limits who can sign in. Leave it empty to open sign-ups.
+- **Limits.** 104 weeks, 50 assignments per week, and 20 tracks per account (`LIMITS` in `shared`).
+- **Data from before accounts.** The migration gives it to a placeholder user. Run
+  `npm run claim-data -w server -- you@example.com`, then sign in with that email.
+
 ## API
 
 | Endpoint | Purpose |
 |---|---|
+| `GET /api/config` | Which sign-in providers are enabled |
 | `GET /api/prep/current` | Current week with assignments, this week's study minutes, next assessment and milestone |
 | `POST /api/prep/advance` | `{ carryOver: id[] }` completes the current week and moves the chosen unfinished assignments to the next |
 | `GET /api/prep/progress` | Planned vs. done, study vs. workplace minutes, per-track totals, last 12 calendar weeks |

@@ -1,5 +1,8 @@
 import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
-import { Box, Flex, Text } from "theme-ui";
+import { useQueryClient } from "@tanstack/react-query";
+import { Box, Button, Flex, Text } from "theme-ui";
+import { authClient } from "./auth";
+import { SignIn } from "./SignIn";
 import { ThisWeek } from "./prep/ThisWeek";
 import { Curriculum } from "./prep/Curriculum";
 
@@ -10,6 +13,16 @@ const linkStyle = {
 };
 
 export function App() {
+  const queryClient = useQueryClient();
+  const session = authClient.useSession();
+  if (session.isPending) return null;
+  if (!session.data) return <SignIn />;
+
+  const signOut = async () => {
+    await authClient.signOut();
+    queryClient.clear();
+  };
+
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <Box as="header" sx={{ borderBottom: "1px solid", borderColor: "border" }}>
@@ -24,9 +37,12 @@ export function App() {
             <NavLink to="/prep" end sx={linkStyle}>This week</NavLink>
             <NavLink to="/prep/curriculum" sx={linkStyle}>Curriculum</NavLink>
           </Flex>
-          <Text variant="tagline" sx={{ ml: "auto", display: ["none", "none", "block"] }}>
-            Your space to plan what's next.
-          </Text>
+          <Flex sx={{ ml: "auto", alignItems: "center", gap: 3 }}>
+            <Text variant="tagline" sx={{ display: ["none", "none", "block"] }}>
+              Your space to plan what's next.
+            </Text>
+            <Button variant="ghost" title={session.data.user.email} onClick={signOut}>Sign out</Button>
+          </Flex>
         </Flex>
       </Box>
       <Box as="main" sx={{ maxWidth: 880, mx: "auto", px: 4, py: 5 }}>

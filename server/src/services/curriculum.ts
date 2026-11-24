@@ -63,11 +63,11 @@ export function planImport(file: Curriculum, existing: ExistingCurriculum): Impo
   };
 }
 
-async function loadExisting(): Promise<ExistingCurriculum> {
+async function loadExisting(userId: string): Promise<ExistingCurriculum> {
   const [tracks, weeks, assignments] = await Promise.all([
-    prisma.track.findMany({ select: { slug: true } }),
-    prisma.week.findMany({ select: { number: true } }),
-    prisma.assignment.findMany({ include: { week: { select: { number: true } } } }),
+    prisma.track.findMany({ where: { userId }, select: { slug: true } }),
+    prisma.week.findMany({ where: { userId }, select: { number: true } }),
+    prisma.assignment.findMany({ where: { userId }, include: { week: { select: { number: true } } } }),
   ]);
   return {
     trackSlugs: new Set(tracks.map((t) => t.slug)),
@@ -81,25 +81,29 @@ async function loadExisting(): Promise<ExistingCurriculum> {
   };
 }
 
-export async function importCurriculum(file: Curriculum, dryRun: boolean): Promise<ImportPlan> {
-  const plan = planImport(file, await loadExisting());
+export async function importCurriculum(userId: string, file: Curriculum, dryRun: boolean): Promise<ImportPlan> {
+  const plan = planImport(file, await loadExisting(userId));
   if (dryRun) return plan;
 
   await prisma.$transaction(
     async (tx) => {
       if (file.settings) {
-        await tx.prepSettings.upsert({ where: { id: 1 }, create: file.settings, update: file.settings });
+        await tx.prepSettings.upsert({
+          where: { userId },
+          create: { ...file.settings, userId },
+          update: file.settings,
+        });
       }
 
       const trackIds = new Map(
-        (await tx.track.findMany({ select: { id: true, slug: true } })).map((t) => [t.slug, t.id]),
+        (await tx.track.findMany({ where: { userId }, select: { id: true, slug: true } })).map((t) => [t.slug, t.id]),
       );
-      await tx.assignment.deleteMany({ where: { key: { in: plan.assignments.remove } } });
+      await tx.assignment.deleteMany({ where: { userId, key: { in: plan.assignments.remove } } });
 
       for (const { assignments, number, ...content } of file.weeks) {
         const week = await tx.week.upsert({
-          where: { number },
-          create: { number, ...content },
+          where: { userId_number: { userId, number } },
+          create: { userId, number, ...content },
           update: content,
         });
         let sortOrder = await nextSortOrder(tx, week.id);
@@ -107,8 +111,8 @@ export async function importCurriculum(file: Curriculum, dryRun: boolean): Promi
         for (const { key, track, progress, ...fields } of assignments) {
           const data = { ...fields, ...progress, trackId: trackIds.get(track)! };
           await tx.assignment.upsert({
-            where: { key },
-            create: { ...data, key, weekId: week.id, sortOrder: sortOrder++ },
+            where: { userId_key: { userId, key } },
+            create: { ...data, userId, key, weekId: week.id, sortOrder: sortOrder++ },
             update: data,
           });
         }
@@ -119,10 +123,11 @@ export async function importCurriculum(file: Curriculum, dryRun: boolean): Promi
   return plan;
 }
 
-export async function exportCurriculum(withProgress: boolean): Promise<Curriculum> {
+export async function exportCurriculum(userId: string, withProgress: boolean): Promise<Curriculum> {
   const [settings, weeks] = await Promise.all([
-    prisma.prepSettings.findUnique({ where: { id: 1 } }),
+    prisma.prepSettings.findUnique({ where: { userId } }),
     prisma.week.findMany({
+      where: { userId },
       orderBy: { number: "asc" },
       include: { assignments: { orderBy: { sortOrder: "asc" }, include: { track: true } } },
     }),

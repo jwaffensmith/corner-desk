@@ -87,6 +87,8 @@ export async function api<T>(path: string, method = "GET", body?: unknown): Prom
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (res.status === 204) return undefined as T;
+  // The session ended; reloading lands on the sign-in screen.
+  if (res.status === 401) window.location.reload();
   const json = await res.json().catch(() => null);
   if (!res.ok) {
     throw new ApiError(res.status, json?.error?.message ?? "Something went wrong", json?.error?.fields);

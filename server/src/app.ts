@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Request, type RequestHandler } from "express";
 import { errorHandler, notFound } from "./middleware/error.js";
 import { tracksRouter } from "./routes/tracks.js";
 import { weeksRouter } from "./routes/weeks.js";
@@ -6,12 +6,41 @@ import { assignmentsRouter } from "./routes/assignments.js";
 import { prepRouter } from "./routes/prep.js";
 import { curriculumRouter } from "./routes/curriculum.js";
 
-export function createApp() {
+declare global {
+  namespace Express {
+    interface Request {
+      userId: string;
+    }
+  }
+}
+
+export interface AppAuth {
+  providers: string[];
+  handler?: RequestHandler;
+  userId(req: Request): Promise<string | null>;
+}
+
+export function createApp(auth: AppAuth) {
   const app = express();
+  // Better Auth reads the raw body, so it has to come before the JSON parser.
+  if (auth.handler) app.all("/api/auth/*splat", auth.handler);
   app.use(express.json({ limit: "2mb" }));
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true });
+  });
+  app.get("/api/config", (_req, res) => {
+    res.json({ providers: auth.providers });
+  });
+
+  app.use("/api", async (req, res, next) => {
+    const userId = await auth.userId(req);
+    if (!userId) {
+      res.status(401).json({ error: { message: "Sign in to continue" } });
+      return;
+    }
+    req.userId = userId;
+    next();
   });
 
   app.use("/api/tracks", tracksRouter);

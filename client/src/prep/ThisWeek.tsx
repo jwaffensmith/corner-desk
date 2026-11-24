@@ -10,7 +10,6 @@ import { Meter } from "../components/Meter";
 import { AssignmentDrawer } from "./AssignmentDrawer";
 import { AssignmentForm } from "./AssignmentForm";
 import { AssignmentRow } from "./AssignmentRow";
-import { ProgressStrip } from "./ProgressStrip";
 
 export function ThisWeek() {
   const current = useCurrent();
@@ -80,8 +79,6 @@ export function ThisWeek() {
         <Button variant="secondary" onClick={() => setAdding(true)}>Add assignment</Button>
         <Button variant="secondary" onClick={() => setFinishing(true)}>Finish week</Button>
       </Flex>
-
-      <ProgressStrip current={current.data} />
 
       {open && <AssignmentDrawer key={open.id} assignment={open} tracks={tracks.data} onClose={() => setOpenId(null)} />}
       {adding && (

@@ -33,7 +33,7 @@ export function SignIn() {
             <Button
               key={provider}
               variant={i === 0 ? "primary" : "secondary"}
-              onClick={() => authClient.signIn.social({ provider, callbackURL: "/prep", errorCallbackURL: "/" })}
+              onClick={() => authClient.signIn.social({ provider, callbackURL: "/", errorCallbackURL: "/" })}
             >
               Continue with {PROVIDER_NAMES[provider] ?? provider}
             </Button>

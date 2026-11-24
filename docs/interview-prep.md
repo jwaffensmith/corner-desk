@@ -37,7 +37,7 @@ Deletes that would lose progress return `409` unless `?force=true`.
 | `PUT /api/weeks/:id/assignments/order` | `{ ids }`, every assignment in the week in its new order |
 | `/api/assignments` | Create, get, update (including `status`, or `weekId` to reschedule), delete |
 | `POST /api/curriculum/import[?dryRun=true]` | Validate and merge a curriculum file; returns the change plan |
-| `GET /api/curriculum/export` | The current curriculum in the import format |
+| `GET /api/curriculum/export[?progress=true]` | The current curriculum in the import format; with `progress=true`, a full backup |
 
 ## Curriculum file
 
@@ -74,6 +74,11 @@ Track slugs: `js-ts`, `cs`, `leetcode`, `system-design`, `agentic`.
 - An assignment the file drops from a week it lists is deleted only if it has no progress; otherwise it is kept and reported.
 - Weeks the file does not mention, and assignments added in the app, are left alone.
 - Week numbers must stay contiguous, and keys must be unique across the file.
+
+**Backups.** `export?progress=true` adds each assignment's `progress` (status, completion
+date, time, confidence, notes) and `isSupplementary`, and each week's `completedAt`. Importing
+a file that carries these restores them, replacing what is in the database. A plain plan
+file has none of them, so it never touches progress.
 
 Run with `?dryRun=true` first to see what will be created, updated, removed, and kept.
 

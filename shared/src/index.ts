@@ -72,6 +72,14 @@ export const advanceSchema = z.object({
   carryOver: z.array(nonEmpty).default([]),
 });
 
+const progressSchema = z.object({
+  status: assignmentStatusEnum,
+  completedAt: z.coerce.date().nullish(),
+  actualMin: minutes.nullish(),
+  confidence: rating.nullish(),
+  notes: optText,
+});
+
 export const curriculumSchema = z.object({
   settings: settingsUpdateSchema.optional(),
   weeks: z.array(z.object({
@@ -79,6 +87,7 @@ export const curriculumSchema = z.object({
     title: optText,
     milestone: optText,
     notes: optText,
+    completedAt: z.coerce.date().nullish(),
     assignments: z.array(z.object({
       key: nonEmpty,
       track: slug,
@@ -87,6 +96,8 @@ export const curriculumSchema = z.object({
       objectives: z.array(nonEmpty).default([]),
       estimatedMin: z.number().int().min(0),
       resources: z.array(resourceSchema).default([]),
+      isSupplementary: z.boolean().optional(),
+      progress: progressSchema.optional(),
     })).default([]),
   })),
 }).superRefine((file, ctx) => {

@@ -14,12 +14,14 @@ export interface ImportPlan {
   weeks: { create: number[]; update: number[] };
   assignments: { create: string[]; update: string[]; remove: string[]; keep: string[] };
   settings: boolean;
+  restoresProgress: number;
 }
 
 // Each week in the file defines that week's planned content. Assignments are matched
 // by key, and only content fields are ever written, so progress survives re-imports.
 // A keyed assignment the file drops is removed only if it is untouched; weeks the file
-// does not mention, and assignments added by hand, are left alone.
+// does not mention, and assignments added by hand, are left alone. The exception is a
+// backup file: an assignment that carries a `progress` block has its progress restored.
 export function planImport(file: Curriculum, existing: ExistingCurriculum): ImportPlan {
   const errors: Record<string, string> = {};
   file.weeks.forEach((week, w) =>
@@ -57,6 +59,7 @@ export function planImport(file: Curriculum, existing: ExistingCurriculum): Impo
       keep: dropped.filter((a) => a.hasProgress).map((a) => a.key),
     },
     settings: file.settings !== undefined,
+    restoresProgress: file.weeks.flatMap((w) => w.assignments).filter((a) => a.progress).length,
   };
 }
 
@@ -101,8 +104,8 @@ export async function importCurriculum(file: Curriculum, dryRun: boolean): Promi
         });
         let sortOrder = await nextSortOrder(tx, week.id);
 
-        for (const { key, track, ...fields } of assignments) {
-          const data = { ...fields, trackId: trackIds.get(track)! };
+        for (const { key, track, progress, ...fields } of assignments) {
+          const data = { ...fields, ...progress, trackId: trackIds.get(track)! };
           await tx.assignment.upsert({
             where: { key },
             create: { ...data, key, weekId: week.id, sortOrder: sortOrder++ },
@@ -116,7 +119,7 @@ export async function importCurriculum(file: Curriculum, dryRun: boolean): Promi
   return plan;
 }
 
-export async function exportCurriculum(): Promise<Curriculum> {
+export async function exportCurriculum(withProgress: boolean): Promise<Curriculum> {
   const [settings, weeks] = await Promise.all([
     prisma.prepSettings.findUnique({ where: { id: 1 } }),
     prisma.week.findMany({
@@ -138,6 +141,7 @@ export async function exportCurriculum(): Promise<Curriculum> {
       title: w.title,
       milestone: w.milestone,
       notes: w.notes,
+      completedAt: withProgress ? w.completedAt : undefined,
       assignments: w.assignments.map((a) => ({
         key: a.key,
         track: a.track.slug,
@@ -146,6 +150,16 @@ export async function exportCurriculum(): Promise<Curriculum> {
         objectives: a.objectives,
         estimatedMin: a.estimatedMin,
         resources: a.resources as Resource[],
+        ...(withProgress && {
+          isSupplementary: a.isSupplementary,
+          progress: {
+            status: a.status,
+            completedAt: a.completedAt,
+            actualMin: a.actualMin,
+            confidence: a.confidence,
+            notes: a.notes,
+          },
+        }),
       })),
     })),
   };

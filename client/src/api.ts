@@ -70,6 +70,7 @@ export interface ImportResult {
     weeks: { create: number[]; update: number[] };
     assignments: { create: string[]; update: string[]; remove: string[]; keep: string[] };
     settings: boolean;
+    restoresProgress: number;
   };
 }
 

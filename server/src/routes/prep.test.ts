@@ -68,6 +68,22 @@ describe("curriculum import", () => {
     expect(res.body.plan.assignments).toMatchObject({ create: [], remove: [] });
   });
 
+  it("restores progress from a backup export", async () => {
+    await importPlan();
+    const a = await byKey("w1-js");
+    await request(app).patch(`/api/assignments/${a.id}`).send({ status: "DONE", notes: "solid", confidence: 4 });
+    await request(app).post("/api/prep/advance").send({ carryOver: [] });
+    const backup = (await request(app).get("/api/curriculum/export?progress=true")).body;
+
+    await prisma.week.deleteMany();
+    const res = await request(app).post("/api/curriculum/import").send(backup);
+
+    expect(res.body.plan.restoresProgress).toBe(9);
+    expect(await byKey("w1-js")).toMatchObject({ status: "DONE", notes: "solid", confidence: 4, actualMin: 45 });
+    expect((await byKey("w1-js")).completedAt).not.toBeNull();
+    expect((await request(app).get("/api/prep/current")).body.week.number).toBe(2);
+  });
+
   it("returns field errors for an unknown track", async () => {
     const bad = { weeks: [{ number: 1, assignments: [{ key: "x", track: "nope", title: "X", estimatedMin: 10 }] }] };
     const res = await request(app).post("/api/curriculum/import").send(bad);

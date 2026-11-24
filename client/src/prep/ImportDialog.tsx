@@ -36,8 +36,8 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
   return (
     <Dialog title="Import curriculum" onClose={onClose}>
       <Text>
-        Paste or choose a curriculum JSON file. Re-importing updates content only. Your progress,
-        time, and notes are never changed.
+        Paste or choose a curriculum JSON file. Re-importing a plan updates content only; your
+        progress, time, and notes are never changed. A backup file restores the progress saved in it.
       </Text>
       <Box>
         <Label htmlFor="import-file">Choose a file</Label>
@@ -64,6 +64,9 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
             <li>Remove {preview.assignments.remove.length} untouched assignments no longer in the file</li>
             {preview.assignments.keep.length > 0 && (
               <li>Keep {preview.assignments.keep.length} dropped assignments because they have progress</li>
+            )}
+            {preview.restoresProgress > 0 && (
+              <li>Restore saved progress on {preview.restoresProgress} assignments, replacing what's there now</li>
             )}
             {preview.settings && <li>Update your targets</li>}
           </Box>

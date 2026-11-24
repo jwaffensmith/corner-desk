@@ -18,11 +18,12 @@ function moved<T>(list: T[], index: number, delta: -1 | 1): T[] | null {
   return next;
 }
 
-async function downloadExport() {
-  const blob = new Blob([JSON.stringify(await api("/curriculum/export"), null, 2)], { type: "application/json" });
+async function downloadExport(withProgress: boolean) {
+  const data = await api(`/curriculum/export?progress=${withProgress}`);
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "curriculum.json";
+  link.download = withProgress ? `cornerdesk-backup-${new Date().toISOString().slice(0, 10)}.json` : "curriculum.json";
   link.click();
   URL.revokeObjectURL(link.href);
 }
@@ -48,7 +49,8 @@ export function Curriculum() {
         <Heading as="h1" sx={{ fontSize: 5 }}>Curriculum</Heading>
         <Flex sx={{ gap: 2, flexWrap: "wrap" }}>
           <Button variant="secondary" onClick={() => setImporting(true)}>Import JSON</Button>
-          <Button variant="secondary" disabled={!weeks.data.length} onClick={downloadExport}>Export</Button>
+          <Button variant="secondary" disabled={!weeks.data.length} onClick={() => downloadExport(false)}>Export plan</Button>
+          <Button variant="secondary" disabled={!weeks.data.length} onClick={() => downloadExport(true)}>Export backup</Button>
           <Button onClick={() => createWeek.mutate({})}>Add week</Button>
         </Flex>
       </Flex>

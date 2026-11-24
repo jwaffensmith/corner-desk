@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Box, Button, Flex, Label, Text, Textarea } from "theme-ui";
+import { Box, Button, Flex, Label, Text } from "theme-ui";
+import { TextArea } from "../components/TextArea";
 import { ApiError, type ImportResult, useImport } from "../api";
 import { Dialog } from "../components/Dialog";
 
@@ -45,7 +46,7 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
       </Box>
       <Box>
         <Label htmlFor="import-json">Curriculum JSON</Label>
-        <Textarea id="import-json" rows={8} value={text} onChange={(e) => edit(e.target.value)} sx={{ fontFamily: "monospace", fontSize: 0 }} />
+        <TextArea id="import-json" rows={12} value={text} onChange={(e) => edit(e.target.value)} sx={{ fontFamily: "monospace", fontSize: 0 }} />
       </Box>
 
       {errors.length > 0 && (

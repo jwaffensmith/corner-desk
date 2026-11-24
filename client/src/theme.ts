@@ -4,7 +4,10 @@ const field = {
   borderColor: "border",
   bg: "white",
   fontFamily: "body",
-  fontSize: 1,
+  fontSize: "16px",
+  lineHeight: "body",
+  px: 3,
+  py: "10px",
   "&:focus-visible": { outline: "2px solid", outlineColor: "accent", outlineOffset: 1 },
 };
 
@@ -53,7 +56,7 @@ export const theme: Theme = {
   },
   forms: {
     input: field,
-    textarea: field,
+    textarea: { ...field, minHeight: 44, resize: "vertical" },
     select: field,
     label: { fontSize: 0, color: "secondary", fontWeight: "bold", mb: 1 },
   },

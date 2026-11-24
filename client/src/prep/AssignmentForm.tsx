@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { Box, Button, Flex, Input, Label, Select, Text, Textarea } from "theme-ui";
+import { Box, Button, Flex, Input, Label, Select, Text } from "theme-ui";
+import { TextArea } from "../components/TextArea";
 import type { AssignmentCreate } from "@cornerdesk/shared";
 import { ApiError, type Assignment, type Track } from "../api";
 
@@ -67,15 +68,15 @@ export function AssignmentForm({ tracks, initial, submitLabel, onSubmit, onCance
       </Flex>
       <Box>
         <Label htmlFor="a-description">Description</Label>
-        <Textarea id="a-description" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+        <TextArea id="a-description" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
       </Box>
       <Box>
         <Label htmlFor="a-objectives">Learning objectives (one per line)</Label>
-        <Textarea id="a-objectives" rows={3} value={objectives} onChange={(e) => setObjectives(e.target.value)} />
+        <TextArea id="a-objectives" rows={4} value={objectives} onChange={(e) => setObjectives(e.target.value)} />
       </Box>
       <Box>
         <Label htmlFor="a-resources">Resources (one per line: Title | URL)</Label>
-        <Textarea id="a-resources" rows={3} value={resources} onChange={(e) => setResources(e.target.value)} />
+        <TextArea id="a-resources" rows={4} value={resources} onChange={(e) => setResources(e.target.value)} />
       </Box>
       {error && <Text role="alert" sx={{ color: "#88542C" }}>{error}</Text>}
       <Flex sx={{ gap: 2 }}>

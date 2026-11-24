@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Box, Button, Card, Flex, Heading, Input, Label, Text } from "theme-ui";
+import { Box, Button, Card, Flex, Heading, Label, Text } from "theme-ui";
 import {
   type Track, type Week, api, useCreateAssignment, useCreateWeek, useDeleteWeek, useReorderAssignments,
   useReorderWeeks, useTracks, useUpdateWeek, useWeeks,
 } from "../api";
 import { Dialog } from "../components/Dialog";
 import { Menu } from "../components/Menu";
+import { TextArea } from "../components/TextArea";
 import { AssignmentDrawer } from "./AssignmentDrawer";
 import { AssignmentForm } from "./AssignmentForm";
 import { AssignmentRow } from "./AssignmentRow";
@@ -119,13 +120,13 @@ function WeekSection({ week, tracks, isCurrent, onOpen, onMove }: WeekProps) {
 
       <Flex sx={{ flexDirection: "column", gap: 3, px: 4, pb: 4 }}>
         <Flex sx={{ gap: 3, flexWrap: "wrap" }}>
-          <Box sx={{ flex: 1, minWidth: 180 }}>
+          <Box sx={{ flex: 2, minWidth: 240 }}>
             <Label htmlFor={`title-${week.id}`}>Title</Label>
-            <Input id={`title-${week.id}`} defaultValue={week.title ?? ""} onBlur={(e) => saveField("title", e.target.value.trim())} />
+            <TextArea id={`title-${week.id}`} rows={1} defaultValue={week.title ?? ""} onBlur={(e) => saveField("title", e.target.value.replace(/\s+/g, " ").trim())} />
           </Box>
-          <Box sx={{ flex: 1, minWidth: 180 }}>
+          <Box sx={{ flex: 2, minWidth: 240 }}>
             <Label htmlFor={`milestone-${week.id}`}>Milestone (optional)</Label>
-            <Input id={`milestone-${week.id}`} defaultValue={week.milestone ?? ""} onBlur={(e) => saveField("milestone", e.target.value.trim())} />
+            <TextArea id={`milestone-${week.id}`} rows={1} defaultValue={week.milestone ?? ""} onBlur={(e) => saveField("milestone", e.target.value.trim())} />
           </Box>
         </Flex>
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Box, Button, Flex, Input, Label, Select, Text, Textarea } from "theme-ui";
+import { Box, Button, Flex, Input, Label, Select, Text } from "theme-ui";
+import { TextArea } from "../components/TextArea";
 import type { AssignmentStatus, AssignmentUpdate } from "@cornerdesk/shared";
 import {
   type Assignment, type Track, formatMinutes, useDeleteAssignment, useUpdateAssignment, useWeeks,
@@ -83,7 +84,7 @@ export function AssignmentDrawer({ assignment: a, tracks, onClose }: Props) {
       )}
 
       <Flex sx={{ gap: 4, flexWrap: "wrap" }}>
-        <Box sx={{ width: 140 }}>
+        <Box sx={{ width: 160 }}>
           <Label htmlFor="d-minutes">Time spent (min)</Label>
           <Input
             id="d-minutes"
@@ -117,9 +118,9 @@ export function AssignmentDrawer({ assignment: a, tracks, onClose }: Props) {
 
       <Box>
         <Label htmlFor="d-notes">Notes</Label>
-        <Textarea
+        <TextArea
           id="d-notes"
-          rows={5}
+          rows={6}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           onBlur={() => notes !== (a.notes ?? "") && save({ notes: notes || null })}

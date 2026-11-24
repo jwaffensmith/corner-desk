@@ -13,7 +13,7 @@ import { Todos } from "./todos/Todos";
 import { Portfolio } from "./portfolio/Portfolio";
 
 const linkStyle = {
-  color: "secondary", textDecoration: "none", py: 2, borderBottom: "2px solid transparent", whiteSpace: "nowrap",
+  color: "secondary", textDecoration: "none", py: [3, 3, 2], borderBottom: "2px solid transparent", whiteSpace: "nowrap",
   "&:hover": { color: "text" },
   "&.active": { color: "primary", fontWeight: "bold", borderColor: "accent" },
 };
@@ -32,16 +32,21 @@ export function App() {
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <Box as="header" sx={{ borderBottom: "1px solid", borderColor: "border" }}>
-        <Flex sx={{ maxWidth: 880, mx: "auto", px: 4, columnGap: 5, alignItems: "center", flexWrap: "wrap" }}>
-          <Link to="/" sx={{ display: "flex", alignItems: "center", gap: 2, py: 3, textDecoration: "none" }}>
+        <Box
+          sx={{
+            maxWidth: 880, mx: "auto", px: 4, display: "grid", alignItems: "center", columnGap: [3, 5, 2],
+            gridTemplateColumns: ["minmax(0, 1fr) auto", "minmax(0, 1fr) auto", "auto minmax(0, 1fr) auto"],
+          }}
+        >
+          <Link to="/" sx={{ display: "flex", alignItems: "center", gap: 2, py: 4, textDecoration: "none", justifySelf: "start" }}>
             <img src="/favicon.svg" alt="" width={40} height={40} sx={{ display: "block" }} />
             <Text sx={{ fontFamily: "heading", fontSize: 4, fontWeight: 700, color: "text", letterSpacing: "-0.01em" }}>
               CornerDesk
             </Text>
           </Link>
           <MainNav />
-          <Button variant="ghost" title={session.data.user.email} onClick={signOut} sx={{ ml: "auto" }}>Sign out</Button>
-        </Flex>
+          <Button variant="ghost" title={session.data.user.email} onClick={signOut} sx={{ whiteSpace: "nowrap" }}>Sign out</Button>
+        </Box>
       </Box>
       <Box as="main" sx={{ maxWidth: 880, mx: "auto", px: 4, py: 5 }}>
         <Routes>
@@ -60,8 +65,8 @@ export function App() {
 
 const EDGE_FADE = "linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent)";
 
-// Below the widest layout the tabs sit on their own row and scroll sideways, out to the
-// screen edges, instead of wrapping. The fade at the edges hints at tabs out of view.
+// Below the widest layout the tabs sit on their own row, out to the screen edges. At any width
+// they scroll sideways instead of wrapping; the fade at the edges hints at tabs out of view.
 function MainNav() {
   const ref = useRef<HTMLElement>(null);
   const { pathname } = useLocation();
@@ -75,10 +80,10 @@ function MainNav() {
       ref={ref}
       aria-label="Main"
       sx={{
-        columnGap: [3, 4], fontSize: [0, 1], order: [1, 1, 0],
-        flexBasis: ["calc(100% + 32px)", "calc(100% + 32px)", "auto"], mx: [-4, -4, 0], px: [4, 4, 0],
+        columnGap: [3, 4], fontSize: [0, 1], gridColumn: ["1 / -1", "1 / -1", "auto"], gridRow: [2, 2, "auto"],
+        minWidth: 0, mx: [-4, -4, 0], px: 4,
         overflowX: "auto", scrollPaddingInline: 16, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" },
-        maskImage: [EDGE_FADE, EDGE_FADE, "none"],
+        maskImage: EDGE_FADE,
       }}
     >
       <NavLink to="/" end sx={linkStyle}>Dashboard</NavLink>

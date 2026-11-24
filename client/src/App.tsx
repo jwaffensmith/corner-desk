@@ -1,6 +1,5 @@
 import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { Box, Flex, Text } from "theme-ui";
-import icon from "./assets/icon.png";
 import { ThisWeek } from "./prep/ThisWeek";
 import { Curriculum } from "./prep/Curriculum";
 
@@ -16,7 +15,7 @@ export function App() {
       <Box as="header" sx={{ borderBottom: "1px solid", borderColor: "border" }}>
         <Flex sx={{ maxWidth: 880, mx: "auto", px: 4, columnGap: 5, alignItems: "center", flexWrap: "wrap" }}>
           <Link to="/prep" sx={{ display: "flex", alignItems: "center", gap: 2, py: 3, textDecoration: "none" }}>
-            <img src={icon} alt="" width={36} height={36} sx={{ borderRadius: 9, display: "block" }} />
+            <img src="/favicon.svg" alt="" width={40} height={40} sx={{ display: "block" }} />
             <Text sx={{ fontFamily: "heading", fontSize: 4, fontWeight: 700, color: "text", letterSpacing: "-0.01em" }}>
               CornerDesk
             </Text>

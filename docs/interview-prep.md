@@ -65,7 +65,7 @@ Deletes that would lose progress return `409` unless `?force=true`.
 }
 ```
 
-Track slugs: `js-ts`, `cs-algorithms`, `leetcode`, `system-design`, `agentic`.
+Track slugs: `js-ts`, `cs`, `leetcode`, `system-design`, `agentic`.
 
 **Merge rules.** Re-importing is safe at any point in the curriculum.
 

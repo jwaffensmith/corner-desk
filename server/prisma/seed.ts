@@ -7,7 +7,7 @@ const TRACKS = [
     description: "Rebuild independent coding: syntax, functions, loops, arrays, objects, async, and language-specific concepts.",
   },
   {
-    slug: "cs-algorithms",
+    slug: "cs",
     name: "Computer Science & Algorithms",
     description: "Data structures, algorithms, time and space complexity, memory, networking, and other CS foundations.",
   },

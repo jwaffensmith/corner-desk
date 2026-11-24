@@ -156,7 +156,7 @@ describe("tracks", () => {
   it("seeds five tracks with agentic outside study hours", async () => {
     const res = await request(app).get("/api/tracks");
     expect(res.body.map((t: { slug: string }) => t.slug)).toEqual([
-      "js-ts", "cs-algorithms", "leetcode", "system-design", "agentic",
+      "js-ts", "cs", "leetcode", "system-design", "agentic",
     ]);
     expect(res.body.at(-1)).toMatchObject({ countsTowardStudy: false, weeklyTargetMin: 0 });
   });

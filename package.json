@@ -1,0 +1,12 @@
+{
+  "name": "corner-desk",
+  "private": true,
+  "type": "module",
+  "workspaces": ["shared", "server"],
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "dev": "npm run dev --workspace server",
+    "test": "npm run test --workspaces --if-present"
+  }
+}

@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+.DS_Store
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Never commit real job-search data
+*.sql
+*.dump
+pgdata/
+seed-real*
+
+# Prisma generated client (regenerate with `npm run prisma:generate -w server`)
+server/src/generated/
+
+# superpowers scratch
+.superpowers/

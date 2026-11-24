@@ -4,6 +4,7 @@ import { Box, Button, Card, Flex, Heading, Label, Text } from "theme-ui";
 import {
   type Week, formatMinutes, useAdvance, useCreateAssignment, useCurrent, useTracks,
 } from "../api";
+import desk from "../assets/desk.png";
 import { Dialog } from "../components/Dialog";
 import { Meter } from "../components/Meter";
 import { AssignmentDrawer } from "./AssignmentDrawer";
@@ -25,7 +26,8 @@ export function ThisWeek() {
   const { week, totalWeeks, settings, studyMinutes = 0 } = current.data;
   if (!week) {
     return (
-      <Card>
+      <Card sx={{ textAlign: "center", py: 6, bg: "background", border: 0 }}>
+        <img src={desk} alt="" sx={{ width: "min(360px, 100%)", height: "auto", mb: 4 }} />
         <Heading as="h1" sx={{ fontSize: 4, mb: 2 }}>
           {totalWeeks ? "Curriculum complete" : "No curriculum yet"}
         </Heading>

@@ -1,5 +1,6 @@
-import { NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { Box, Flex, Text } from "theme-ui";
+import icon from "./assets/icon.png";
 import { ThisWeek } from "./prep/ThisWeek";
 import { Curriculum } from "./prep/Curriculum";
 
@@ -13,14 +14,20 @@ export function App() {
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <Box as="header" sx={{ borderBottom: "1px solid", borderColor: "border" }}>
-        <Flex sx={{ maxWidth: 880, mx: "auto", px: 4, gap: 5, alignItems: "baseline", flexWrap: "wrap" }}>
-          <Text sx={{ fontFamily: "heading", fontSize: 3, fontWeight: "heading", color: "primary", py: 3 }}>
-            CornerDesk
-          </Text>
+        <Flex sx={{ maxWidth: 880, mx: "auto", px: 4, columnGap: 5, alignItems: "center", flexWrap: "wrap" }}>
+          <Link to="/prep" sx={{ display: "flex", alignItems: "center", gap: 2, py: 3, textDecoration: "none" }}>
+            <img src={icon} alt="" width={36} height={36} sx={{ borderRadius: 9, display: "block" }} />
+            <Text sx={{ fontFamily: "heading", fontSize: 4, fontWeight: 700, color: "text", letterSpacing: "-0.01em" }}>
+              CornerDesk
+            </Text>
+          </Link>
           <Flex as="nav" aria-label="Interview prep" sx={{ gap: 4 }}>
             <NavLink to="/prep" end sx={linkStyle}>This week</NavLink>
             <NavLink to="/prep/curriculum" sx={linkStyle}>Curriculum</NavLink>
           </Flex>
+          <Text variant="tagline" sx={{ ml: "auto", display: ["none", "none", "block"] }}>
+            Your space to plan what's next.
+          </Text>
         </Flex>
       </Box>
       <Box as="main" sx={{ maxWidth: 880, mx: "auto", px: 4, py: 5 }}>

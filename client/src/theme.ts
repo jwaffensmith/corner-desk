@@ -33,6 +33,7 @@ export const theme: Theme = {
     heading: { fontFamily: "heading", fontWeight: "heading", lineHeight: "heading", color: "primary" },
     label: { fontSize: 0, color: "secondary", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: "bold" },
     meta: { fontSize: 0, color: "secondary" },
+    tagline: { fontSize: "11px", color: "secondary", textTransform: "uppercase", letterSpacing: "0.28em" },
   },
   buttons: {
     primary: {

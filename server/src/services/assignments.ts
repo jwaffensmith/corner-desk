@@ -17,14 +17,18 @@ export function hasProgress(a: {
 }
 
 // Checking an assignment off records the estimate as time spent unless a time is
-// already logged, so a one-click check-off still counts toward study hours.
+// already logged, so a one-click check-off still counts toward study hours. Unchecking
+// takes that time back out.
 export function resolveCompletion(
   existing: ExistingAssignment,
   input: Pick<AssignmentUpdate, "status" | "completedAt" | "actualMin" | "estimatedMin">,
   now: Date,
 ): { completedAt: Date | null; actualMin?: number | null } {
   const status = input.status ?? existing.status;
-  if (status !== "DONE") return { completedAt: null };
+  if (status !== "DONE") {
+    const unchecked = existing.status === "DONE" && status === "TODO" && input.actualMin === undefined;
+    return unchecked ? { completedAt: null, actualMin: null } : { completedAt: null };
+  }
 
   const completedAt = input.completedAt ?? existing.completedAt ?? now;
   if (input.actualMin !== undefined) return { completedAt, actualMin: input.actualMin };

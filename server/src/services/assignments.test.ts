@@ -17,9 +17,9 @@ describe("resolveCompletion", () => {
     expect(resolveCompletion(todo, { status: "DONE", actualMin: 60 }, now)).toEqual({ completedAt: now, actualMin: 60 });
   });
 
-  it("clears the completion date when unchecked or skipped", () => {
+  it("clears the date and logged time when unchecked, and only the date when skipped", () => {
     const done = { ...todo, status: "DONE" as const, completedAt: now, actualMin: 45 };
-    expect(resolveCompletion(done, { status: "TODO" }, now)).toEqual({ completedAt: null });
+    expect(resolveCompletion(done, { status: "TODO" }, now)).toEqual({ completedAt: null, actualMin: null });
     expect(resolveCompletion(done, { status: "SKIPPED" }, now)).toEqual({ completedAt: null });
   });
 

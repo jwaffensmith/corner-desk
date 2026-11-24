@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Box, Button, Flex, Text } from "theme-ui";
 import { authClient } from "./auth";
 import { SignIn } from "./SignIn";
+import { Loading } from "./components/Loading";
 import { Dashboard } from "./dashboard/Dashboard";
 import { ThisWeek } from "./prep/ThisWeek";
 import { Curriculum } from "./prep/Curriculum";
@@ -20,7 +21,7 @@ const linkStyle = {
 export function App() {
   const queryClient = useQueryClient();
   const session = authClient.useSession();
-  if (session.isPending) return null;
+  if (session.isPending) return <Loading layout="screen" />;
   if (!session.data) return <SignIn />;
 
   const signOut = async () => {

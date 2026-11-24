@@ -1,6 +1,7 @@
 import { Fragment, useState, type FormEvent } from "react";
 import { Box, Button, Card, Flex, Heading, Input, Text } from "theme-ui";
 import { type Project, errorMessage, useCreateTodo, useProjects } from "../api";
+import { Loading } from "../components/Loading";
 import { Meter } from "../components/Meter";
 import { TodoDialog } from "../todos/TodoDialog";
 import { TodoRow } from "../todos/TodoRow";
@@ -13,7 +14,7 @@ export function Portfolio() {
   const [todoId, setTodoId] = useState<string | null>(null);
 
   if (projects.isError) return <Text role="alert">Couldn't load your projects. Is the API running?</Text>;
-  if (!projects.data) return <Text>Loading…</Text>;
+  if (!projects.data) return <Loading />;
 
   const editing = projects.data.find((p) => p.id === projectId);
   const todo = projects.data.flatMap((p) => p.todos).find((t) => t.id === todoId);

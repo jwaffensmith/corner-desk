@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Box, Card, Flex, Grid, Heading, Text } from "theme-ui";
 import { useCurrent, useProjects } from "../api";
+import { Loading } from "../components/Loading";
 import { Meter } from "../components/Meter";
 import { ProgressStrip } from "../prep/ProgressStrip";
 
@@ -8,7 +9,7 @@ export function Dashboard() {
   const current = useCurrent();
 
   if (current.isError) return <Text role="alert">Couldn't load your progress. Is the API running?</Text>;
-  if (!current.data) return <Text>Loading…</Text>;
+  if (!current.data) return <Loading />;
 
   return (
     <Flex sx={{ flexDirection: "column", gap: 4 }}>

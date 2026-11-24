@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Box, Button, Card, Flex, Heading, Input, Label, Text } from "theme-ui";
 import { type NetworkingEvent, useNetworking, useUpdateEvent, useUpdateNetworkingGoal } from "../api";
 import { ListSection } from "../components/ListSection";
+import { Loading } from "../components/Loading";
 import { Meter } from "../components/Meter";
 import { RowButton } from "../components/RowButton";
 import { formatDay, formatMonth, monthsThrough, today } from "../lib/dates";
@@ -13,7 +14,7 @@ export function Networking() {
   const [adding, setAdding] = useState(false);
 
   if (networking.isError) return <Text role="alert">Couldn't load your events. Is the API running?</Text>;
-  if (!networking.data) return <Text>Loading…</Text>;
+  if (!networking.data) return <Loading />;
 
   const { events, eventsPerMonth } = networking.data;
   const now = today();

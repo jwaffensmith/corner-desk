@@ -6,6 +6,7 @@ import {
 } from "../api";
 import desk from "../assets/desk.png";
 import { Dialog } from "../components/Dialog";
+import { Loading } from "../components/Loading";
 import { Meter } from "../components/Meter";
 import { WeekTodos } from "../todos/WeekTodos";
 import { AssignmentDrawer } from "./AssignmentDrawer";
@@ -30,7 +31,7 @@ function WeekPlan() {
   const [finishing, setFinishing] = useState(false);
 
   if (current.isError || tracks.isError) return <Text role="alert">Couldn't load your plan. Is the API running?</Text>;
-  if (!current.data || !tracks.data) return <Text>Loading…</Text>;
+  if (!current.data || !tracks.data) return <Loading />;
 
   const { week, totalWeeks, settings, studyMinutes = 0 } = current.data;
   if (!week) {

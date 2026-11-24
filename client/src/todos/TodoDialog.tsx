@@ -1,17 +1,21 @@
 import { useState, type FormEvent } from "react";
-import { Box, Button, Flex, Input, Label, Text } from "theme-ui";
-import { type Todo, errorMessage, useCreateTodo, useDeleteTodo, useTodos, useUpdateTodo } from "../api";
+import { Box, Button, Flex, Input, Label, Select, Text } from "theme-ui";
+import {
+  type Todo, errorMessage, useCreateTodo, useDeleteTodo, useProjects, useTodos, useUpdateTodo,
+} from "../api";
 import { Dialog } from "../components/Dialog";
 import { TextArea } from "../components/TextArea";
 
 export function TodoDialog({ todo, onClose }: { todo?: Todo; onClose: () => void }) {
   const categories = [...new Set((useTodos().data ?? []).flatMap((t) => t.category ?? []))].sort();
+  const projects = useProjects().data ?? [];
   const create = useCreateTodo();
   const update = useUpdateTodo();
   const remove = useDeleteTodo();
   const [title, setTitle] = useState(todo?.title ?? "");
   const [dueDate, setDueDate] = useState(todo?.dueDate ?? "");
   const [category, setCategory] = useState(todo?.category ?? "");
+  const [projectId, setProjectId] = useState(todo?.projectId ?? "");
   const [repeatsWeekly, setRepeatsWeekly] = useState(todo?.repeatsWeekly ?? false);
   const [notes, setNotes] = useState(todo?.notes ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +23,10 @@ export function TodoDialog({ todo, onClose }: { todo?: Todo; onClose: () => void
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    const body = { title, dueDate: dueDate || null, category: category || null, repeatsWeekly, notes: notes || null };
+    const body = {
+      title, dueDate: dueDate || null, category: category || null, projectId: projectId || null, repeatsWeekly,
+      notes: notes || null,
+    };
     try {
       await (todo ? update.mutateAsync({ id: todo.id, ...body }) : create.mutateAsync(body));
       onClose();
@@ -48,6 +55,18 @@ export function TodoDialog({ todo, onClose }: { todo?: Todo; onClose: () => void
             </datalist>
           </Box>
         </Flex>
+        {projects.length > 0 && (
+          <Box>
+            <Label htmlFor="t-project">Portfolio project (optional)</Label>
+            <Select id="t-project" value={projectId} onChange={(e) => setProjectId(e.target.value)}>
+              <option value="">None</option>
+              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </Select>
+            {projectId && !dueDate && (
+              <Text variant="meta">Without a due date it stays on the Portfolio page, off your to-do list.</Text>
+            )}
+          </Box>
+        )}
         <Box>
           <Label sx={{ gap: 2, alignItems: "center", fontSize: 1, color: "text", fontWeight: "body", m: 0 }}>
             <input type="checkbox" checked={repeatsWeekly} onChange={(e) => setRepeatsWeekly(e.target.checked)} />

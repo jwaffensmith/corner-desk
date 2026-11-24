@@ -23,6 +23,7 @@ model User {
   networking    NetworkingSettings?
   events        NetworkingEvent[]
   todos         Todo[]
+  projects      Project[]
 }
 
 model Session {
@@ -179,6 +180,9 @@ model Todo {
   id            String    @id @default(cuid())
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
+  // userId is part of the foreign key, so a to-do's project always belongs to the same user.
+  project       Project?  @relation(fields: [projectId, userId], references: [id, userId], onDelete: Cascade)
+  projectId     String?
   title         String
   notes         String?
   category      String?
@@ -189,4 +193,21 @@ model Todo {
   updatedAt     DateTime  @updatedAt
 
   @@index([userId, completedAt])
+  @@index([projectId])
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  name      String
+  liveUrl   String?
+  repoUrl   String?
+  notes     String?
+  todos     Todo[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, userId])
+  @@index([userId])
 }

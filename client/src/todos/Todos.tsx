@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Box, Button, Card, Flex, Heading, Text } from "theme-ui";
 import { type Todo, useTodos } from "../api";
 import { ListSection } from "../components/ListSection";
@@ -14,7 +15,10 @@ export function Todos() {
   if (todos.isError) return <Text role="alert">Couldn't load your to-dos. Is the API running?</Text>;
   if (!todos.data) return <Text>Loading…</Text>;
 
-  const open = todos.data.filter((t) => !t.completedAt);
+  // A project's undated improvements are its backlog and stay on the Portfolio page.
+  const isBacklog = (t: Todo) => t.projectId !== null && !t.dueDate;
+  const open = todos.data.filter((t) => !t.completedAt && !isBacklog(t));
+  const backlog = todos.data.filter((t) => !t.completedAt && isBacklog(t)).length;
   const done = todos.data.filter((t) => t.completedAt);
   const sections: [string, Todo[]][] = [
     ["This week", open.filter((t) => dueThisWeek(t.dueDate))],
@@ -43,6 +47,13 @@ export function Todos() {
       {sections.filter(([, items]) => items.length > 0).map(([title, items]) => (
         <ListSection key={title} title={title}>{rows(items)}</ListSection>
       ))}
+
+      {backlog > 0 && (
+        <Text variant="meta">
+          {backlog === 1 ? "1 portfolio improvement" : `${backlog} portfolio improvements`} without a due date{" "}
+          {backlog === 1 ? "is" : "are"} kept on <Link to="/portfolio">Portfolio</Link>.
+        </Text>
+      )}
 
       {done.length > 0 && (
         <details>

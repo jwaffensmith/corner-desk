@@ -1,17 +1,14 @@
 import { Router } from "express";
 import { LIMITS, todoCreateSchema, todoUpdateSchema } from "@cornerdesk/shared";
 import { prisma } from "../db.js";
-import type { Todo } from "../generated/prisma/client.js";
-import { fromDay, toDay } from "../lib/dates.js";
+import { fromDay } from "../lib/dates.js";
 import { assertRoom } from "../lib/http.js";
 import { validate } from "../lib/validate.js";
-import { updateTodo } from "../services/todos.js";
+import { serializeTodo as serialize, updateTodo } from "../services/todos.js";
 
 export const todosRouter = Router();
 
 const RECENTLY_DONE = 50;
-
-const serialize = (todo: Todo) => ({ ...todo, dueDate: todo.dueDate && toDay(todo.dueDate) });
 
 todosRouter.get("/", async (req, res) => {
   const { userId } = req;

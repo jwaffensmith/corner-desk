@@ -14,7 +14,8 @@ commitments like a program's weekly responsibilities.
 
 ## Data model
 
-- **Todo**: title, optional notes, `category`, and `dueDate`; `repeatsWeekly`; `completedAt`.
+- **Todo**: title, optional notes, `category`, and `dueDate`; `repeatsWeekly`; `completedAt`. An optional
+  `projectId` ties it to a portfolio project (see [portfolio.md](portfolio.md)).
 
 **Weekly repeats.** The copy keeps the title, notes, and category. Its due date is a week
 after the finished one's, moved on by whole weeks until it is after today, so it keeps its
@@ -37,6 +38,7 @@ An account can hold 300 open to-dos (`LIMITS` in `shared`).
 
 `/todos` groups open to-dos into "This week" (due by Sunday, including anything past due),
 "Later", and "Anytime" (no date), with recently finished ones folded away below.
+A portfolio improvement without a due date is left out here and stays on `/portfolio`.
 
 The "This week" group also sits beside the curriculum on `/prep` as a sidebar (below it on
 narrow screens). The sidebar adds every open weekly to-do, even one due later or undated,

@@ -1,6 +1,9 @@
 import type { TodoUpdate } from "@cornerdesk/shared";
 import { prisma } from "../db.js";
+import type { Todo } from "../generated/prisma/client.js";
 import { fromDay, localDate, toDay } from "../lib/dates.js";
+
+export const serializeTodo = (todo: Todo) => ({ ...todo, dueDate: todo.dueDate && toDay(todo.dueDate) });
 
 const addWeek = (day: string) => toDay(new Date(fromDay(day).getTime() + 7 * 86_400_000));
 
@@ -26,9 +29,9 @@ export function updateTodo(userId: string, id: string, { completed, dueDate, ...
     if (!completed || existing.completedAt || !updated.repeatsWeekly) return updated;
 
     // The repeat moves to the new copy, so reopening and finishing this one again can't add another.
-    const { title, notes, category } = updated;
+    const { title, notes, category, projectId } = updated;
     const due = nextDue(updated.dueDate && toDay(updated.dueDate), localDate(now));
-    await tx.todo.create({ data: { userId, title, notes, category, dueDate: fromDay(due), repeatsWeekly: true } });
+    await tx.todo.create({ data: { userId, projectId, title, notes, category, dueDate: fromDay(due), repeatsWeekly: true } });
     return tx.todo.update({ where: { id }, data: { repeatsWeekly: false } });
   });
 }

@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { Flex, Text } from "theme-ui";
-import { type Todo, useUpdateTodo } from "../api";
+import { type Todo, useProjects, useUpdateTodo } from "../api";
 import { RowButton } from "../components/RowButton";
 import { dayOf, formatDay, today } from "../lib/dates";
 
@@ -10,11 +10,13 @@ function due(day: string): ReactNode {
   return day === now ? "Due today" : `Due ${formatDay(day)}`;
 }
 
-export function TodoRow({ todo: t, onOpen }: { todo: Todo; onOpen: () => void }) {
+export function TodoRow({ todo: t, onOpen, inProject }: { todo: Todo; onOpen: () => void; inProject?: boolean }) {
   const update = useUpdateTodo();
+  const projects = useProjects();
   const done = Boolean(t.completedAt);
   const meta = [
     t.completedAt ? `Done ${formatDay(dayOf(t.completedAt))}` : t.dueDate && due(t.dueDate),
+    !inProject && projects.data?.find((p) => p.id === t.projectId)?.name,
     t.category,
     t.repeatsWeekly && "Repeats weekly",
   ].filter(Boolean);

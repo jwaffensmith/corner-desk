@@ -8,6 +8,7 @@ import { ThisWeek } from "./prep/ThisWeek";
 import { Curriculum } from "./prep/Curriculum";
 import { Networking } from "./networking/Networking";
 import { Todos } from "./todos/Todos";
+import { Portfolio } from "./portfolio/Portfolio";
 
 const linkStyle = {
   color: "secondary", textDecoration: "none", py: 2, borderBottom: "2px solid transparent",
@@ -46,6 +47,7 @@ export function App() {
             <NavLink to="/prep" end sx={linkStyle}>This week</NavLink>
             <NavLink to="/prep/curriculum" sx={linkStyle}>Curriculum</NavLink>
             <NavLink to="/networking" sx={linkStyle}>Networking</NavLink>
+            <NavLink to="/portfolio" sx={linkStyle}>Portfolio</NavLink>
           </Flex>
           <Button variant="ghost" title={session.data.user.email} onClick={signOut} sx={{ ml: "auto" }}>Sign out</Button>
         </Flex>
@@ -57,6 +59,7 @@ export function App() {
           <Route path="/prep/curriculum" element={<Curriculum />} />
           <Route path="/networking" element={<Networking />} />
           <Route path="/todos" element={<Todos />} />
+          <Route path="/portfolio" element={<Portfolio />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Box>

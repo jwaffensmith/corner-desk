@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
-  AssignmentCreate, AssignmentStatus, AssignmentUpdate, EventCreate, EventStatus, EventUpdate, Resource, TodoCreate,
-  TodoUpdate, WeekCreate, WeekUpdate,
+  AssignmentCreate, AssignmentStatus, AssignmentUpdate, EventCreate, EventStatus, EventUpdate, ProjectCreate,
+  ProjectUpdate, Resource, TodoCreate, TodoUpdate, WeekCreate, WeekUpdate,
 } from "@cornerdesk/shared";
 
 export interface Track {
@@ -98,6 +98,16 @@ export interface Todo {
   dueDate: string | null;
   repeatsWeekly: boolean;
   completedAt: string | null;
+  projectId: string | null;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  liveUrl: string | null;
+  repoUrl: string | null;
+  notes: string | null;
+  todos: Todo[];
 }
 
 export class ApiError extends Error {
@@ -208,13 +218,21 @@ export function useUpdateTodo() {
     mutationFn: ({ id, ...body }: TodoUpdate & { id: string }) => api<Todo>(`/todos/${id}`, "PATCH", body),
     onMutate: async ({ id, completed }) => {
       if (completed === undefined) return;
-      await client.cancelQueries({ queryKey: ["todos"] });
+      await Promise.all(["todos", "projects"].map((key) => client.cancelQueries({ queryKey: [key] })));
       const completedAt = completed ? new Date().toISOString() : null;
-      client.setQueryData<Todo[]>(["todos"], (todos) => todos?.map((t) => (t.id === id ? { ...t, completedAt } : t)));
+      const patch = (todos: Todo[]) => todos.map((t) => (t.id === id ? { ...t, completedAt } : t));
+      client.setQueryData<Todo[]>(["todos"], (todos) => todos && patch(todos));
+      client.setQueryData<Project[]>(["projects"], (projects) => projects?.map((p) => ({ ...p, todos: patch(p.todos) })));
     },
     onSettled: () => client.invalidateQueries(),
   });
 }
+
+export const useProjects = () => useQuery({ queryKey: ["projects"], queryFn: () => api<Project[]>("/projects") });
+export const useCreateProject = () => useApiMutation((body: ProjectCreate) => api<Project>("/projects", "POST", body));
+export const useUpdateProject = () =>
+  useApiMutation(({ id, ...body }: ProjectUpdate & { id: string }) => api<Project>(`/projects/${id}`, "PATCH", body));
+export const useDeleteProject = () => useApiMutation((id: string) => api(`/projects/${id}`, "DELETE"));
 
 export const formatMinutes = (min: number) =>
   min < 60 ? `${min} min` : `${Math.round((min / 60) * 10) / 10} h`;

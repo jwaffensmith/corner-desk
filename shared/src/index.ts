@@ -11,7 +11,7 @@ const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase lette
 
 const day = z.iso.date();
 
-export const LIMITS = { weeks: 104, assignmentsPerWeek: 50, tracks: 20, events: 500, openTodos: 300 } as const;
+export const LIMITS = { weeks: 104, assignmentsPerWeek: 50, tracks: 20, events: 500, openTodos: 300, projects: 50 } as const;
 
 export const resourceSchema = z.object({
   title: nonEmpty,
@@ -144,10 +144,19 @@ export const todoCreateSchema = z.object({
   category: optText,
   dueDate: day.nullish(),
   repeatsWeekly: z.boolean().optional(),
+  projectId: nonEmpty.nullish(),
 });
 export const todoUpdateSchema = todoCreateSchema.partial().extend({
   completed: z.boolean().optional(),
 });
+
+export const projectCreateSchema = z.object({
+  name: nonEmpty,
+  liveUrl: z.httpUrl().nullish(),
+  repoUrl: z.httpUrl().nullish(),
+  notes: optText,
+});
+export const projectUpdateSchema = projectCreateSchema.partial();
 
 export type TrackCreate = z.infer<typeof trackCreateSchema>;
 export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;
@@ -160,3 +169,5 @@ export type EventCreate = z.infer<typeof eventCreateSchema>;
 export type EventUpdate = z.infer<typeof eventUpdateSchema>;
 export type TodoCreate = z.infer<typeof todoCreateSchema>;
 export type TodoUpdate = z.infer<typeof todoUpdateSchema>;
+export type ProjectCreate = z.infer<typeof projectCreateSchema>;
+export type ProjectUpdate = z.infer<typeof projectUpdateSchema>;

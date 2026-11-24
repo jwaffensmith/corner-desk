@@ -40,4 +40,5 @@ An account can hold 300 open to-dos (`LIMITS` in `shared`).
 
 The "This week" group also sits beside the curriculum on `/prep` as a sidebar (below it on
 narrow screens). The sidebar adds every open weekly to-do, even one due later or undated,
-and keeps to-dos finished since Monday in view, struck through.
+and keeps to-dos finished since Monday in view, struck through. It collapses to its
+heading and an open count, and the browser remembers which way you left it.

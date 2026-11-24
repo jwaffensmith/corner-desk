@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import express, { type Request, type RequestHandler } from "express";
 import { errorHandler, notFound } from "./middleware/error.js";
 import { tracksRouter } from "./routes/tracks.js";
@@ -23,7 +24,7 @@ export interface AppAuth {
   userId(req: Request): Promise<string | null>;
 }
 
-export function createApp(auth: AppAuth) {
+export function createApp(auth: AppAuth, clientDir?: string) {
   const app = express();
   // Better Auth reads the raw body, so it has to come before the JSON parser.
   if (auth.handler) app.all("/api/auth/*splat", auth.handler);
@@ -54,6 +55,12 @@ export function createApp(auth: AppAuth) {
   app.use("/api/networking", networkingRouter);
   app.use("/api/todos", todosRouter);
   app.use("/api/projects", projectsRouter);
+
+  if (clientDir) {
+    app.use(express.static(clientDir));
+    // Client-side routes all load the single page.
+    app.get(/^(?!\/api\/)/, (_req, res) => res.sendFile(join(clientDir, "index.html")));
+  }
 
   app.use(notFound);
   app.use(errorHandler);

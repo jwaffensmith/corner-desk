@@ -11,7 +11,7 @@ const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase lette
 
 const day = z.iso.date();
 
-export const LIMITS = { weeks: 104, assignmentsPerWeek: 50, tracks: 20, events: 500 } as const;
+export const LIMITS = { weeks: 104, assignmentsPerWeek: 50, tracks: 20, events: 500, openTodos: 300 } as const;
 
 export const resourceSchema = z.object({
   title: nonEmpty,
@@ -138,6 +138,17 @@ export const networkingSettingsSchema = z.object({
   eventsPerMonth: z.coerce.number().int().min(1).max(31),
 });
 
+export const todoCreateSchema = z.object({
+  title: nonEmpty,
+  notes: optText,
+  category: optText,
+  dueDate: day.nullish(),
+  repeatsWeekly: z.boolean().optional(),
+});
+export const todoUpdateSchema = todoCreateSchema.partial().extend({
+  completed: z.boolean().optional(),
+});
+
 export type TrackCreate = z.infer<typeof trackCreateSchema>;
 export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;
 export type WeekCreate = z.infer<typeof weekCreateSchema>;
@@ -147,3 +158,5 @@ export type AssignmentUpdate = z.infer<typeof assignmentUpdateSchema>;
 export type Curriculum = z.infer<typeof curriculumSchema>;
 export type EventCreate = z.infer<typeof eventCreateSchema>;
 export type EventUpdate = z.infer<typeof eventUpdateSchema>;
+export type TodoCreate = z.infer<typeof todoCreateSchema>;
+export type TodoUpdate = z.infer<typeof todoUpdateSchema>;

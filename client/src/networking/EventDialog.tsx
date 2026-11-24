@@ -70,7 +70,7 @@ export function EventDialog({ event, onClose }: { event?: NetworkingEvent; onClo
           <Label htmlFor="e-notes">Notes (optional)</Label>
           <TextArea id="e-notes" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </Box>
-        {error && <Text role="alert" sx={{ color: "#88542C" }}>{error}</Text>}
+        {error && <Text role="alert" sx={{ color: "alert" }}>{error}</Text>}
         <Flex sx={{ gap: 2 }}>
           <Button type="submit">{event ? "Save" : "Add"}</Button>
           <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>

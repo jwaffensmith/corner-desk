@@ -21,6 +21,7 @@ export const theme: Theme = {
     muted: "#F3EEE3",
     border: "#DCD5C5",
     wood: "#CC884D",
+    alert: "#88542C",
     white: "#FFFFFF",
   },
   fonts: {

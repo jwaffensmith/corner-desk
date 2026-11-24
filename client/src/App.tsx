@@ -6,6 +6,7 @@ import { SignIn } from "./SignIn";
 import { ThisWeek } from "./prep/ThisWeek";
 import { Curriculum } from "./prep/Curriculum";
 import { Networking } from "./networking/Networking";
+import { Todos } from "./todos/Todos";
 
 const linkStyle = {
   color: "secondary", textDecoration: "none", py: 2, borderBottom: "2px solid transparent",
@@ -34,10 +35,11 @@ export function App() {
               CornerDesk
             </Text>
           </Link>
-          <Flex as="nav" aria-label="Main" sx={{ gap: 4 }}>
+          <Flex as="nav" aria-label="Main" sx={{ gap: 4, order: [1, 1, 0], flexBasis: ["100%", "100%", "auto"] }}>
             <NavLink to="/prep" end sx={linkStyle}>This week</NavLink>
             <NavLink to="/prep/curriculum" sx={linkStyle}>Curriculum</NavLink>
             <NavLink to="/networking" sx={linkStyle}>Networking</NavLink>
+            <NavLink to="/todos" sx={linkStyle}>To-do</NavLink>
           </Flex>
           <Button variant="ghost" title={session.data.user.email} onClick={signOut} sx={{ ml: "auto" }}>Sign out</Button>
         </Flex>
@@ -47,6 +49,7 @@ export function App() {
           <Route path="/prep" element={<ThisWeek />} />
           <Route path="/prep/curriculum" element={<Curriculum />} />
           <Route path="/networking" element={<Networking />} />
+          <Route path="/todos" element={<Todos />} />
           <Route path="*" element={<Navigate to="/prep" replace />} />
         </Routes>
       </Box>

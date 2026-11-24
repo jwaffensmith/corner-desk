@@ -77,7 +77,7 @@ export function AssignmentForm({ tracks, initial, submitLabel, onSubmit, onCance
         <Label htmlFor="a-resources">Resources (one per line: Title | URL)</Label>
         <TextArea id="a-resources" rows={4} value={resources} onChange={(e) => setResources(e.target.value)} />
       </Box>
-      {error && <Text role="alert" sx={{ color: "#88542C" }}>{error}</Text>}
+      {error && <Text role="alert" sx={{ color: "alert" }}>{error}</Text>}
       <Flex sx={{ gap: 2 }}>
         <Button type="submit">{submitLabel}</Button>
         <Button type="button" variant="secondary" onClick={onCancel}>Cancel</Button>

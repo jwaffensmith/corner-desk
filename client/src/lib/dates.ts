@@ -4,6 +4,7 @@ const toDay = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.
 const parse = (day: string) => new Date(`${day}T00:00:00`);
 
 export const today = () => toDay(new Date());
+export const dayOf = (timestamp: string) => toDay(new Date(timestamp));
 
 export function formatDay(day: string): string {
   const date = parse(day);
@@ -27,4 +28,11 @@ export function formatMonth(month: string): string {
 export function monthsThrough(last: string, count: number): string[] {
   const [year, month] = last.split("-").map(Number);
   return Array.from({ length: count }, (_, i) => toDay(new Date(year, month - count + i, 1)).slice(0, 7));
+}
+
+// Weeks run Monday to Sunday.
+export function endOfWeek(day: string): string {
+  const date = parse(day);
+  date.setDate(date.getDate() + ((7 - date.getDay()) % 7));
+  return toDay(date);
 }

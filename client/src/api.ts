@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
-  AssignmentCreate, AssignmentStatus, AssignmentUpdate, EventCreate, EventStatus, EventUpdate, Resource, WeekCreate,
-  WeekUpdate,
+  AssignmentCreate, AssignmentStatus, AssignmentUpdate, EventCreate, EventStatus, EventUpdate, Resource, TodoCreate,
+  TodoUpdate, WeekCreate, WeekUpdate,
 } from "@cornerdesk/shared";
 
 export interface Track {
@@ -88,6 +88,16 @@ export interface NetworkingEvent {
 export interface Networking {
   eventsPerMonth: number;
   events: NetworkingEvent[];
+}
+
+export interface Todo {
+  id: string;
+  title: string;
+  notes: string | null;
+  category: string | null;
+  dueDate: string | null;
+  repeatsWeekly: boolean;
+  completedAt: string | null;
 }
 
 export class ApiError extends Error {
@@ -187,6 +197,24 @@ export const useUpdateEvent = () =>
 export const useDeleteEvent = () => useApiMutation((id: string) => api(`/networking/events/${id}`, "DELETE"));
 export const useUpdateNetworkingGoal = () =>
   useApiMutation((eventsPerMonth: number) => api("/networking/settings", "PATCH", { eventsPerMonth }));
+
+export const useTodos = () => useQuery({ queryKey: ["todos"], queryFn: () => api<Todo[]>("/todos") });
+export const useCreateTodo = () => useApiMutation((body: TodoCreate) => api<Todo>("/todos", "POST", body));
+export const useDeleteTodo = () => useApiMutation((id: string) => api(`/todos/${id}`, "DELETE"));
+
+export function useUpdateTodo() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: TodoUpdate & { id: string }) => api<Todo>(`/todos/${id}`, "PATCH", body),
+    onMutate: async ({ id, completed }) => {
+      if (completed === undefined) return;
+      await client.cancelQueries({ queryKey: ["todos"] });
+      const completedAt = completed ? new Date().toISOString() : null;
+      client.setQueryData<Todo[]>(["todos"], (todos) => todos?.map((t) => (t.id === id ? { ...t, completedAt } : t)));
+    },
+    onSettled: () => client.invalidateQueries(),
+  });
+}
 
 export const formatMinutes = (min: number) =>
   min < 60 ? `${min} min` : `${Math.round((min / 60) * 10) / 10} h`;

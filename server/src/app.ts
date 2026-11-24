@@ -6,6 +6,7 @@ import { assignmentsRouter } from "./routes/assignments.js";
 import { prepRouter } from "./routes/prep.js";
 import { curriculumRouter } from "./routes/curriculum.js";
 import { networkingRouter } from "./routes/networking.js";
+import { todosRouter } from "./routes/todos.js";
 
 declare global {
   namespace Express {
@@ -50,6 +51,7 @@ export function createApp(auth: AppAuth) {
   app.use("/api/prep", prepRouter);
   app.use("/api/curriculum", curriculumRouter);
   app.use("/api/networking", networkingRouter);
+  app.use("/api/todos", todosRouter);
 
   app.use(notFound);
   app.use(errorHandler);

@@ -1,4 +1,5 @@
-import { Link, NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Box, Button, Flex, Text } from "theme-ui";
 import { authClient } from "./auth";
@@ -11,7 +12,7 @@ import { Todos } from "./todos/Todos";
 import { Portfolio } from "./portfolio/Portfolio";
 
 const linkStyle = {
-  color: "secondary", textDecoration: "none", py: 2, borderBottom: "2px solid transparent",
+  color: "secondary", textDecoration: "none", py: 2, borderBottom: "2px solid transparent", whiteSpace: "nowrap",
   "&:hover": { color: "text" },
   "&.active": { color: "primary", fontWeight: "bold", borderColor: "accent" },
 };
@@ -37,18 +38,7 @@ export function App() {
               CornerDesk
             </Text>
           </Link>
-          <Flex
-            as="nav"
-            aria-label="Main"
-            sx={{ columnGap: [3, 4], fontSize: [0, 1], flexWrap: "wrap", order: [1, 1, 0], flexBasis: ["100%", "100%", "auto"] }}
-          >
-            <NavLink to="/" end sx={linkStyle}>Dashboard</NavLink>
-            <NavLink to="/todos" sx={linkStyle}>To-do</NavLink>
-            <NavLink to="/prep" end sx={linkStyle}>This week</NavLink>
-            <NavLink to="/prep/curriculum" sx={linkStyle}>Curriculum</NavLink>
-            <NavLink to="/networking" sx={linkStyle}>Networking</NavLink>
-            <NavLink to="/portfolio" sx={linkStyle}>Portfolio</NavLink>
-          </Flex>
+          <MainNav />
           <Button variant="ghost" title={session.data.user.email} onClick={signOut} sx={{ ml: "auto" }}>Sign out</Button>
         </Flex>
       </Box>
@@ -64,5 +54,38 @@ export function App() {
         </Routes>
       </Box>
     </Box>
+  );
+}
+
+const EDGE_FADE = "linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent)";
+
+// Below the widest layout the tabs sit on their own row and scroll sideways, out to the
+// screen edges, instead of wrapping. The fade at the edges hints at tabs out of view.
+function MainNav() {
+  const ref = useRef<HTMLElement>(null);
+  const { pathname } = useLocation();
+  useEffect(() => {
+    ref.current?.querySelector(".active")?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [pathname]);
+
+  return (
+    <Flex
+      as="nav"
+      ref={ref}
+      aria-label="Main"
+      sx={{
+        columnGap: [3, 4], fontSize: [0, 1], order: [1, 1, 0],
+        flexBasis: ["calc(100% + 32px)", "calc(100% + 32px)", "auto"], mx: [-4, -4, 0], px: [4, 4, 0],
+        overflowX: "auto", scrollPaddingInline: 16, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" },
+        maskImage: [EDGE_FADE, EDGE_FADE, "none"],
+      }}
+    >
+      <NavLink to="/" end sx={linkStyle}>Dashboard</NavLink>
+      <NavLink to="/todos" sx={linkStyle}>To-do</NavLink>
+      <NavLink to="/prep" end sx={linkStyle}>This week</NavLink>
+      <NavLink to="/prep/curriculum" sx={linkStyle}>Curriculum</NavLink>
+      <NavLink to="/networking" sx={linkStyle}>Networking</NavLink>
+      <NavLink to="/portfolio" sx={linkStyle}>Portfolio</NavLink>
+    </Flex>
   );
 }

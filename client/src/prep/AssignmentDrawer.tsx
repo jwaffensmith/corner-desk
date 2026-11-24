@@ -131,9 +131,14 @@ export function AssignmentDrawer({ assignment: a, tracks, onClose }: Props) {
       </Box>
 
       <Flex sx={{ gap: 2, alignItems: "end", flexWrap: "wrap", borderTop: "1px solid", borderColor: "border", pt: 4 }}>
-        <Box sx={{ flex: 1, minWidth: 160 }}>
+        <Box sx={{ flexBasis: "100%", minWidth: 0 }}>
           <Label htmlFor="d-week">Scheduled for</Label>
-          <Select id="d-week" value={a.weekId} onChange={(e) => save({ weekId: e.target.value })}>
+          <Select
+            id="d-week"
+            value={a.weekId}
+            onChange={(e) => save({ weekId: e.target.value })}
+            sx={{ pr: 5, textOverflow: "ellipsis", whiteSpace: "nowrap", overflow: "hidden" }}
+          >
             {weeks.data?.map((w) => (
               <option key={w.id} value={w.id}>Week {w.number}{w.title ? `: ${w.title}` : ""}</option>
             ))}

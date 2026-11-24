@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { createApp } from "./app.js";
 import { appAuth } from "./auth.js";
 
@@ -6,6 +8,7 @@ if (!appAuth.providers.length) {
 }
 
 const port = Number(process.env.PORT ?? 4000);
-createApp(appAuth).listen(port, () => {
+const clientDir = resolve(import.meta.dirname, "../../client/dist");
+createApp(appAuth, existsSync(clientDir) ? clientDir : undefined).listen(port, () => {
   console.log(`API listening on http://localhost:${port}`);
 });

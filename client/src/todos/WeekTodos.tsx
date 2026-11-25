@@ -7,14 +7,14 @@ import { dayOf, dueThisWeek, startOfThisWeek } from "../lib/dates";
 import { TodoDialog } from "./TodoDialog";
 import { TodoRow } from "./TodoRow";
 
-const COLLAPSED_KEY = "cornerdesk:week-todos-collapsed";
+const EXPANDED_KEY = "cornerdesk:week-todos-expanded";
 
 // To-dos due by the end of this week plus every open weekly one, whatever its date, with
 // the ones finished this week kept in view.
 export function WeekTodos() {
   const todos = useTodos();
   const [openId, setOpenId] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(() => localStorage.getItem(COLLAPSED_KEY) === null);
+  const [expanded, setExpanded] = useState(() => localStorage.getItem(EXPANDED_KEY) !== null);
 
   const weekStart = startOfThisWeek();
   const items = (todos.data ?? []).filter((t) =>
@@ -26,8 +26,8 @@ export function WeekTodos() {
 
   function onToggle(open: boolean) {
     setExpanded(open);
-    if (open) localStorage.removeItem(COLLAPSED_KEY);
-    else localStorage.setItem(COLLAPSED_KEY, "1");
+    if (open) localStorage.setItem(EXPANDED_KEY, "1");
+    else localStorage.removeItem(EXPANDED_KEY);
   }
 
   return (

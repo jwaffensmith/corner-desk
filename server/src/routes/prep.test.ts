@@ -68,6 +68,35 @@ describe("curriculum import", () => {
 
     const res = await api.post("/api/curriculum/import?dryRun=true").send(exported);
     expect(res.body.plan.assignments).toMatchObject({ create: [], remove: [] });
+    expect(res.body.plan.tracks.create).toEqual([]);
+  });
+
+  it("creates the tracks a file lists that the account lacks, and leaves the rest alone", async () => {
+    const res = await api.post("/api/curriculum/import").send({
+      tracks: [{ slug: "writing", name: "Writing", weeklyTargetMin: 30 }, { slug: "js-ts", name: "Renamed" }],
+      weeks: [{ number: 1, assignments: [{ key: "w1-essay", track: "writing", title: "Essay", estimatedMin: 30 }] }],
+    });
+    expect(res.body.plan.tracks.create).toEqual(["writing"]);
+
+    const tracks = (await api.get("/api/tracks")).body;
+    expect(tracks.at(-1)).toMatchObject({ slug: "writing", name: "Writing", weeklyTargetMin: 30 });
+    expect(tracks[0].name).toBe("JavaScript & TypeScript Fundamentals");
+    expect((await byKey("w1-essay")).trackId).toBe(tracks.at(-1).id);
+  });
+
+  it("restores a backup into an account that lacks its custom tracks", async () => {
+    const track = (await api.post("/api/tracks").send({ name: "Public Speaking", countsTowardStudy: false })).body;
+    const week = (await api.post("/api/weeks").send({})).body;
+    await api.post("/api/assignments").send({ weekId: week.id, trackId: track.id, title: "Lightning talk", estimatedMin: 60 });
+    const backup = (await api.get("/api/curriculum/export?progress=true")).body;
+
+    await createUser(OTHER);
+    const res = await as(OTHER).post("/api/curriculum/import").send(backup);
+
+    expect(res.body.plan.tracks.create).toEqual(["public-speaking"]);
+    const restored = await prisma.track.findUniqueOrThrow({ where: { userId_slug: { userId: OTHER, slug: "public-speaking" } } });
+    expect(restored).toMatchObject({ name: "Public Speaking", countsTowardStudy: false });
+    expect(await prisma.assignment.count({ where: { userId: OTHER, trackId: restored.id } })).toBe(1);
   });
 
   it("restores progress from a backup export", async () => {
@@ -177,6 +206,20 @@ describe("tracks", () => {
       "js-ts", "cs", "leetcode", "system-design", "agentic",
     ]);
     expect(res.body.at(-1)).toMatchObject({ countsTowardStudy: false, weeklyTargetMin: 0 });
+  });
+
+  it("names a new track's slug after it and lists it last", async () => {
+    const cs = await prisma.track.findUniqueOrThrow({ where: { userId_slug: { userId: OWNER, slug: "cs" } } });
+    expect((await api.delete(`/api/tracks/${cs.id}`)).status).toBe(204);
+
+    const first = await api.post("/api/tracks").send({ name: "Public Speaking" });
+    const second = await api.post("/api/tracks").send({ name: "Public speaking" });
+    expect(first.status).toBe(201);
+    expect(first.body).toMatchObject({ slug: "public-speaking", weeklyTargetMin: 45, countsTowardStudy: true });
+    expect(second.body.slug).toBe("public-speaking-2");
+
+    const slugs = (await api.get("/api/tracks")).body.map((t: { slug: string }) => t.slug);
+    expect(slugs).toEqual(["js-ts", "leetcode", "system-design", "agentic", "public-speaking", "public-speaking-2"]);
   });
 
   it("refuses to delete a track that has assignments", async () => {

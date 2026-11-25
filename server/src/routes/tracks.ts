@@ -3,6 +3,7 @@ import { LIMITS, trackCreateSchema, trackUpdateSchema } from "@cornerdesk/shared
 import { prisma } from "../db.js";
 import { HttpError, assertRoom } from "../lib/http.js";
 import { validate } from "../lib/validate.js";
+import { uniqueSlug } from "../services/tracks.js";
 
 export const tracksRouter = Router();
 
@@ -11,10 +12,11 @@ tracksRouter.get("/", async (req, res) => {
 });
 
 tracksRouter.post("/", validate(trackCreateSchema), async (req, res) => {
-  const count = await prisma.track.count({ where: { userId: req.userId } });
-  assertRoom(count, LIMITS.tracks, "tracks");
-  const sortOrder = req.body.sortOrder ?? count;
-  res.status(201).json(await prisma.track.create({ data: { ...req.body, userId: req.userId, sortOrder } }));
+  const existing = await prisma.track.findMany({ where: { userId: req.userId }, select: { slug: true, sortOrder: true } });
+  assertRoom(existing.length, LIMITS.tracks, "tracks");
+  const slug = req.body.slug ?? uniqueSlug(req.body.name, existing.map((t) => t.slug));
+  const sortOrder = req.body.sortOrder ?? Math.max(-1, ...existing.map((t) => t.sortOrder)) + 1;
+  res.status(201).json(await prisma.track.create({ data: { ...req.body, slug, userId: req.userId, sortOrder } }));
 });
 
 tracksRouter.patch("/:id", validate(trackUpdateSchema), async (req, res) => {

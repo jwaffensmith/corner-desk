@@ -47,6 +47,15 @@ export function AssignmentForm({ tracks, initial, submitLabel, onSubmit, onCance
     }
   }
 
+  if (!tracks.length) {
+    return (
+      <>
+        <Text>Every assignment belongs to a learning track. Add one on the Curriculum page first.</Text>
+        <Box><Button variant="secondary" onClick={onCancel}>Close</Button></Box>
+      </>
+    );
+  }
+
   return (
     <Flex as="form" onSubmit={submit} sx={{ flexDirection: "column", gap: 3 }}>
       <Box>

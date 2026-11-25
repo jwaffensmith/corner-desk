@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Button, Card, Flex, Grid, Heading, Label, Text } from "theme-ui";
 import {
-  type Week, formatMinutes, useAdvance, useCreateAssignment, useCurrent, useTracks,
+  type Week, formatMinutes, trackTarget, useAdvance, useCreateAssignment, useCurrent, useTracks,
 } from "../api";
 import desk from "../assets/desk.png";
 import { Dialog } from "../components/Dialog";
@@ -76,9 +76,7 @@ function WeekPlan() {
         <Box as="section" key={track.id} aria-labelledby={`track-${track.id}`}>
           <Flex sx={{ justifyContent: "space-between", alignItems: "baseline", gap: 3 }}>
             <Heading as="h2" id={`track-${track.id}`} sx={{ fontSize: 2 }}>{track.name}</Heading>
-            <Text variant="meta">
-              {track.countsTowardStudy ? `${formatMinutes(track.weeklyTargetMin)} a week` : "During the workday"}
-            </Text>
+            <Text variant="meta">{trackTarget(track)}</Text>
           </Flex>
           <Box as="ul" sx={{ listStyle: "none", p: 0, m: 0, mt: 2 }}>
             {items.map((a) => <AssignmentRow key={a.id} assignment={a} onOpen={() => setOpenId(a.id)} />)}

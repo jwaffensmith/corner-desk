@@ -25,12 +25,15 @@ export const idListSchema = z.object({
   ids: z.array(nonEmpty).refine((ids) => new Set(ids).size === ids.length, "Duplicate ids"),
 });
 
-export const trackCreateSchema = z.object({
-  slug,
+const trackFields = {
   name: nonEmpty,
   description: optText,
   weeklyTargetMin: minutes.optional(),
   countsTowardStudy: z.boolean().optional(),
+};
+export const trackCreateSchema = z.object({
+  slug: slug.optional(),
+  ...trackFields,
   sortOrder: z.coerce.number().int().optional(),
 });
 export const trackUpdateSchema = trackCreateSchema.partial();
@@ -88,6 +91,7 @@ const progressSchema = z.object({
 
 export const curriculumSchema = z.object({
   settings: settingsUpdateSchema.optional(),
+  tracks: z.array(z.object({ slug, ...trackFields })).max(LIMITS.tracks).optional(),
   weeks: z.array(z.object({
     number: z.number().int().min(1).max(LIMITS.weeks),
     title: optText,
@@ -107,6 +111,13 @@ export const curriculumSchema = z.object({
     })).max(LIMITS.assignmentsPerWeek).default([]),
   })).max(LIMITS.weeks),
 }).superRefine((file, ctx) => {
+  const slugs = new Set<string>();
+  file.tracks?.forEach((track, t) => {
+    if (slugs.has(track.slug)) {
+      ctx.addIssue({ code: "custom", path: ["tracks", t, "slug"], message: `Duplicate track "${track.slug}"` });
+    }
+    slugs.add(track.slug);
+  });
   const numbers = new Set<number>();
   const keys = new Set<string>();
   file.weeks.forEach((week, w) => {
@@ -174,6 +185,7 @@ export const bookNoteCreateSchema = z.object({
 export const bookNoteUpdateSchema = bookNoteCreateSchema.partial();
 
 export type TrackCreate = z.infer<typeof trackCreateSchema>;
+export type TrackUpdate = z.infer<typeof trackUpdateSchema>;
 export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;
 export type WeekCreate = z.infer<typeof weekCreateSchema>;
 export type WeekUpdate = z.infer<typeof weekUpdateSchema>;

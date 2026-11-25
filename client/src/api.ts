@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
-  AssignmentCreate, AssignmentStatus, AssignmentUpdate, EventCreate, EventStatus, EventUpdate, ProjectCreate,
-  ProjectUpdate, Resource, TodoCreate, TodoUpdate, WeekCreate, WeekUpdate,
+  AssignmentCreate, AssignmentStatus, AssignmentUpdate, BookCreate, BookNoteCreate, BookNoteUpdate, BookUpdate,
+  EventCreate, EventStatus, EventUpdate, ProjectCreate, ProjectUpdate, Resource, TodoCreate, TodoUpdate, WeekCreate,
+  WeekUpdate,
 } from "@cornerdesk/shared";
 
 export interface Track {
@@ -108,6 +109,21 @@ export interface Project {
   repoUrl: string | null;
   notes: string | null;
   todos: Todo[];
+}
+
+export interface BookNote {
+  id: string;
+  bookId: string;
+  text: string;
+  location: string | null;
+  isTakeaway: boolean;
+}
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string | null;
+  notes: BookNote[];
 }
 
 export class ApiError extends Error {
@@ -233,6 +249,32 @@ export const useCreateProject = () => useApiMutation((body: ProjectCreate) => ap
 export const useUpdateProject = () =>
   useApiMutation(({ id, ...body }: ProjectUpdate & { id: string }) => api<Project>(`/projects/${id}`, "PATCH", body));
 export const useDeleteProject = () => useApiMutation((id: string) => api(`/projects/${id}`, "DELETE"));
+
+export const useBooks = () => useQuery({ queryKey: ["books"], queryFn: () => api<Book[]>("/reading/books") });
+export const useCreateBook = () => useApiMutation((body: BookCreate) => api<Book>("/reading/books", "POST", body));
+export const useUpdateBook = () =>
+  useApiMutation(({ id, ...body }: BookUpdate & { id: string }) => api<Book>(`/reading/books/${id}`, "PATCH", body));
+export const useDeleteBook = () => useApiMutation((id: string) => api(`/reading/books/${id}`, "DELETE"));
+
+export const useCreateBookNote = () =>
+  useApiMutation(({ bookId, ...body }: BookNoteCreate & { bookId: string }) =>
+    api<BookNote>(`/reading/books/${bookId}/notes`, "POST", body));
+export const useDeleteBookNote = () => useApiMutation((id: string) => api(`/reading/notes/${id}`, "DELETE"));
+
+export function useUpdateBookNote() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: BookNoteUpdate & { id: string }) =>
+      api<BookNote>(`/reading/notes/${id}`, "PATCH", body),
+    onMutate: async ({ id, isTakeaway }) => {
+      if (isTakeaway === undefined) return;
+      await client.cancelQueries({ queryKey: ["books"] });
+      client.setQueryData<Book[]>(["books"], (books) =>
+        books?.map((b) => ({ ...b, notes: b.notes.map((n) => (n.id === id ? { ...n, isTakeaway } : n)) })));
+    },
+    onSettled: () => client.invalidateQueries(),
+  });
+}
 
 export const formatMinutes = (min: number) =>
   min < 60 ? `${min} min` : `${Math.round((min / 60) * 10) / 10} h`;

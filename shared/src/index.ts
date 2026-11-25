@@ -11,7 +11,9 @@ const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase lette
 
 const day = z.iso.date();
 
-export const LIMITS = { weeks: 104, assignmentsPerWeek: 50, tracks: 20, events: 500, openTodos: 300, projects: 50 } as const;
+export const LIMITS = {
+  weeks: 104, assignmentsPerWeek: 50, tracks: 20, events: 500, openTodos: 300, projects: 50, books: 100, notesPerBook: 1000,
+} as const;
 
 export const resourceSchema = z.object({
   title: nonEmpty,
@@ -158,6 +160,19 @@ export const projectCreateSchema = z.object({
 });
 export const projectUpdateSchema = projectCreateSchema.partial();
 
+export const bookCreateSchema = z.object({
+  title: nonEmpty,
+  author: optText,
+});
+export const bookUpdateSchema = bookCreateSchema.partial();
+
+export const bookNoteCreateSchema = z.object({
+  text: nonEmpty,
+  location: optText,
+  isTakeaway: z.boolean().optional(),
+});
+export const bookNoteUpdateSchema = bookNoteCreateSchema.partial();
+
 export type TrackCreate = z.infer<typeof trackCreateSchema>;
 export type SettingsUpdate = z.infer<typeof settingsUpdateSchema>;
 export type WeekCreate = z.infer<typeof weekCreateSchema>;
@@ -171,3 +186,7 @@ export type TodoCreate = z.infer<typeof todoCreateSchema>;
 export type TodoUpdate = z.infer<typeof todoUpdateSchema>;
 export type ProjectCreate = z.infer<typeof projectCreateSchema>;
 export type ProjectUpdate = z.infer<typeof projectUpdateSchema>;
+export type BookCreate = z.infer<typeof bookCreateSchema>;
+export type BookUpdate = z.infer<typeof bookUpdateSchema>;
+export type BookNoteCreate = z.infer<typeof bookNoteCreateSchema>;
+export type BookNoteUpdate = z.infer<typeof bookNoteUpdateSchema>;

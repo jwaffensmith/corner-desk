@@ -24,6 +24,7 @@ model User {
   events        NetworkingEvent[]
   todos         Todo[]
   projects      Project[]
+  books         Book[]
 }
 
 model Session {
@@ -210,4 +211,33 @@ model Project {
 
   @@unique([id, userId])
   @@index([userId])
+}
+
+model Book {
+  id        String     @id @default(cuid())
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  title     String
+  author    String?
+  notes     BookNote[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([id, userId])
+  @@index([userId])
+}
+
+model BookNote {
+  id         String   @id @default(cuid())
+  // userId is part of the foreign key, so a note's book always belongs to the same user.
+  userId     String
+  book       Book     @relation(fields: [bookId, userId], references: [id, userId], onDelete: Cascade)
+  bookId     String
+  text       String
+  location   String?
+  isTakeaway Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([bookId, createdAt])
 }

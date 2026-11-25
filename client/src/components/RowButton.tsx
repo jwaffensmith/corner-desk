@@ -21,7 +21,12 @@ export function RowButton({ title, meta, dimmed, struck, onClick }: Props) {
         "&:focus-visible": { outline: "2px solid", outlineColor: "accent" },
       }}
     >
-      <Text sx={{ display: "block", color: dimmed ? "secondary" : "text", textDecoration: struck ? "line-through" : "none" }}>
+      <Text
+        sx={{
+          display: "block", whiteSpace: "pre-wrap", overflowWrap: "anywhere",
+          color: dimmed ? "secondary" : "text", textDecoration: struck ? "line-through" : "none",
+        }}
+      >
         {title}
       </Text>
       {meta && <Text variant="meta">{meta}</Text>}

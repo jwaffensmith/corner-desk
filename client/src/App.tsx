@@ -11,6 +11,7 @@ import { Curriculum } from "./prep/Curriculum";
 import { Networking } from "./networking/Networking";
 import { Todos } from "./todos/Todos";
 import { Portfolio } from "./portfolio/Portfolio";
+import { Reading } from "./reading/Reading";
 
 const PAGE_PX = [5, 5, 5, 6];
 
@@ -58,6 +59,7 @@ export function App() {
           <Route path="/networking" element={<Networking />} />
           <Route path="/todos" element={<Todos />} />
           <Route path="/portfolio" element={<Portfolio />} />
+          <Route path="/reading" element={<Reading />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Box>
@@ -94,6 +96,7 @@ function MainNav() {
       <NavLink to="/prep/curriculum" sx={linkStyle}>Curriculum</NavLink>
       <NavLink to="/networking" sx={linkStyle}>Networking</NavLink>
       <NavLink to="/portfolio" sx={linkStyle}>Portfolio</NavLink>
+      <NavLink to="/reading" sx={linkStyle}>Reading</NavLink>
     </Flex>
   );
 }

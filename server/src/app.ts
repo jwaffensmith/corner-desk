@@ -9,6 +9,7 @@ import { curriculumRouter } from "./routes/curriculum.js";
 import { networkingRouter } from "./routes/networking.js";
 import { todosRouter } from "./routes/todos.js";
 import { projectsRouter } from "./routes/projects.js";
+import { readingRouter } from "./routes/reading.js";
 
 declare global {
   namespace Express {
@@ -55,6 +56,7 @@ export function createApp(auth: AppAuth, clientDir?: string) {
   app.use("/api/networking", networkingRouter);
   app.use("/api/todos", todosRouter);
   app.use("/api/projects", projectsRouter);
+  app.use("/api/reading", readingRouter);
 
   if (clientDir) {
     app.use(express.static(clientDir));

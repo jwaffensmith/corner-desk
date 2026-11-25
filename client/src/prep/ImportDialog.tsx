@@ -40,6 +40,9 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
         Paste or choose a curriculum JSON file. Re-importing a plan updates content only; your
         progress, time, and notes are never changed. A backup file restores the progress saved in it.
       </Text>
+      <Text>
+        Writing your own? <a href="/curriculum.example.json" download>Download an example file</a> to start from.
+      </Text>
       <Box>
         <Label htmlFor="import-file">Choose a file</Label>
         <input id="import-file" type="file" accept="application/json,.json" onChange={async (e) => edit((await e.target.files?.[0]?.text()) ?? "")} />

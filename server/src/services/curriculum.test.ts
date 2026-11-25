@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 import { LIMITS, curriculumSchema } from "@cornerdesk/shared";
 import { planImport, type ExistingCurriculum } from "./curriculum.js";
@@ -91,6 +92,14 @@ describe("curriculumSchema", () => {
     });
     expect(result.success).toBe(false);
     expect(result.error?.issues.map((i) => i.message)).toEqual(['Duplicate week 1', 'Duplicate key "a"']);
+  });
+
+  it("accepts the example file, which imports into an account with no tracks", () => {
+    const path = new URL("../../../client/public/curriculum.example.json", import.meta.url);
+    const example = curriculumSchema.parse(JSON.parse(readFileSync(path, "utf8")));
+    const plan = planImport(example, { trackSlugs: new Set(), weekNumbers: [], assignments: [] });
+    expect(plan.weeks.create).toEqual([1, 2]);
+    expect(plan.assignments.create).toHaveLength(8);
   });
 
   it("rejects a track listed twice", () => {

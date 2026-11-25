@@ -136,8 +136,7 @@ function AddNote({ book }: { book: Book }) {
     e.currentTarget.querySelector("textarea")?.focus();
     create.mutate(
       { bookId: book.id, text, location: location.trim() || null, isTakeaway },
-      // The chapter stays filled in for the next note from the same place.
-      { onSuccess: () => { setText(""); setIsTakeaway(false); } },
+      { onSuccess: () => { setText(""); setLocation(""); setIsTakeaway(false); } },
     );
   }
 

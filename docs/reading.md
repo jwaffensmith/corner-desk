@@ -8,7 +8,7 @@ Notes and takeaways from the books you read for work.
 |---|---|---|
 | Notes are short entries | A book holds many notes, not one long page | Jotting is quick and each thought can be edited, starred, or deleted on its own. |
 | Takeaways | A note you star, not a separate thing | You find out which notes matter after writing them. Starring moves a note between the two lists. |
-| Chapter or page | Optional free text on each note | Enough to find the passage again without modelling chapters. The add box keeps the last one, since consecutive notes usually come from the same place. |
+| Chapter or page | Optional free text on each note | Enough to find the passage again without modelling chapters. |
 | Order | Books newest first. Notes newest first, takeaways in the order written | The book you're reading and the note you just wrote sit at the top. Takeaways read back in the order the book makes its points. |
 | Deleting | Deleting a book deletes its notes | They mean nothing without it. The confirmation says how many will go. |
 

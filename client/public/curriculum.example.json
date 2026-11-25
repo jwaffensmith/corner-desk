@@ -1,0 +1,125 @@
+{
+  "tracks": [
+    { "slug": "js-ts", "name": "JavaScript & TypeScript Fundamentals", "weeklyTargetMin": 90 },
+    { "slug": "cs", "name": "Computer Science & Algorithms", "weeklyTargetMin": 45 },
+    { "slug": "leetcode", "name": "LeetCode & Problem-Solving", "weeklyTargetMin": 45 },
+    {
+      "slug": "system-design",
+      "name": "System Design & Architecture",
+      "description": "API design, databases, caching, scalability, and trade-offs."
+    }
+  ],
+  "weeks": [
+    {
+      "number": 1,
+      "title": "Foundations",
+      "milestone": "Write debounce and memoize from memory and explain every line",
+      "notes": "These are meant to be a stretch. Finish a first pass of each, then log your confidence honestly.",
+      "assignments": [
+        {
+          "key": "w01-js-closures",
+          "track": "js-ts",
+          "title": "Closures under pressure",
+          "description": "Write memoize with a custom key resolver, debounce with leading and trailing options plus cancel, and a once that preserves this. No lodash, no looking anything up.",
+          "objectives": [
+            "Explain why a closure captures a binding, not a value",
+            "Find and fix a stale closure in a timer callback",
+            "Pass this and arguments through a wrapper correctly"
+          ],
+          "estimatedMin": 60,
+          "resources": [
+            { "title": "MDN: Closures", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures" },
+            { "title": "javascript.info: Variable scope, closure", "url": "https://javascript.info/closure" }
+          ]
+        },
+        {
+          "key": "w01-js-array-methods",
+          "track": "js-ts",
+          "title": "Rebuild the array methods to spec",
+          "description": "Write map, filter, reduce, flat, and flatMap as standalone functions that match the built-ins on sparse arrays, thisArg, a reduce with no initial value, and an empty array.",
+          "objectives": [
+            "Predict what each built-in does with a hole in the array",
+            "Write a test that tells your version apart from the built-in, then make it pass"
+          ],
+          "estimatedMin": 60,
+          "resources": [
+            { "title": "MDN: Array", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array" }
+          ]
+        },
+        {
+          "key": "w01-cs-big-o",
+          "track": "cs",
+          "title": "Complexity beyond the single loop",
+          "description": "Derive time and space for merge sort, naive and memoized Fibonacci, and your flat from this week. Then show why pushing to a dynamic array is O(1) amortized.",
+          "objectives": [
+            "Solve a recurrence by drawing its recursion tree",
+            "Count the call stack as part of space complexity",
+            "Explain amortized cost without saying 'on average'"
+          ],
+          "estimatedMin": 45,
+          "resources": [
+            { "title": "Big-O Cheat Sheet", "url": "https://www.bigocheatsheet.com/" }
+          ]
+        },
+        {
+          "key": "w01-leetcode-two-sum",
+          "track": "leetcode",
+          "title": "Two Sum three ways, then 3Sum",
+          "description": "Solve Two Sum by brute force, with a hash map, and with two pointers on sorted input. Then extend the two-pointer version to 3Sum with no duplicate triplets.",
+          "objectives": ["State the time and space trade-off of each approach before writing it"],
+          "estimatedMin": 45,
+          "resources": [
+            { "title": "LeetCode 1: Two Sum", "url": "https://leetcode.com/problems/two-sum/" },
+            { "title": "LeetCode 15: 3Sum", "url": "https://leetcode.com/problems/3sum/" }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Async and data structures",
+      "milestone": "Explain the event loop out loud in under two minutes",
+      "assignments": [
+        {
+          "key": "w02-js-promises",
+          "track": "js-ts",
+          "title": "Promises and async/await",
+          "description": "Write sleep, retry, and a timeout wrapper. Convert each between .then chains and async/await.",
+          "objectives": ["Trace the order of microtasks and timers", "Handle a rejected promise in both styles"],
+          "estimatedMin": 60,
+          "resources": [
+            { "title": "MDN: Using promises", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises" }
+          ]
+        },
+        {
+          "key": "w02-cs-stack-queue",
+          "track": "cs",
+          "title": "Stacks and queues",
+          "description": "Implement both on top of an array, then a queue from two stacks.",
+          "objectives": ["Say when each one is the right fit"],
+          "estimatedMin": 45
+        },
+        {
+          "key": "w02-leetcode-valid-parentheses",
+          "track": "leetcode",
+          "title": "Valid Parentheses",
+          "estimatedMin": 30,
+          "resources": [
+            { "title": "LeetCode 20: Valid Parentheses", "url": "https://leetcode.com/problems/valid-parentheses/" }
+          ]
+        },
+        {
+          "key": "w02-sd-what-happens-url",
+          "track": "system-design",
+          "title": "What happens when you load a URL",
+          "description": "Sketch the path from DNS lookup to rendered page and name each hop.",
+          "objectives": ["Place DNS, TLS, the load balancer, and the cache in order"],
+          "estimatedMin": 40,
+          "resources": [
+            { "title": "The System Design Primer", "url": "https://github.com/donnemartin/system-design-primer" }
+          ]
+        }
+      ]
+    }
+  ]
+}

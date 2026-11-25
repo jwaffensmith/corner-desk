@@ -60,6 +60,7 @@ export function ImportDialog({ onClose }: { onClose: () => void }) {
         <Box aria-live="polite" sx={{ bg: "muted", p: 3, borderRadius: "sm" }}>
           <Text variant="label">This import will</Text>
           <Box as="ul" sx={{ pl: 4, my: 1 }}>
+            {preview.tracks.create.length > 0 && <li>Add {preview.tracks.create.length} learning tracks</li>}
             <li>Add {preview.weeks.create.length} weeks and update {preview.weeks.update.length}</li>
             <li>Add {preview.assignments.create.length} assignments and update {preview.assignments.update.length}</li>
             <li>Remove {preview.assignments.remove.length} untouched assignments no longer in the file</li>

@@ -8,7 +8,8 @@ progress tracking. Each account has its own tracks, curriculum, and progress.
 | Decision | Choice | Why |
 |---|---|---|
 | Pacing | Self-paced | The current week is the lowest-numbered week not marked complete. You move on with "advance," so time away never creates overdue work. |
-| Tracks | Table, not enum | "Agentic doesn't count toward the 100 hours" is the `countsTowardStudy` flag, and a sixth track is a data change. |
+| Tracks | Yours to define | A new account starts with five, and you can add, rename, or delete them. "Agentic doesn't count toward the 100 hours" is the `countsTowardStudy` flag. |
+| Track slugs | Made from the name, then fixed | Curriculum files refer to a track by its slug, so renaming a track never breaks a file written earlier. |
 | Completion | `TODO` / `DONE` / `SKIPPED` | Completion records that the work happened. Proficiency is measured separately (confidence now; assessments later). Skipping removes an assignment from the plan instead of leaving it unfinished. |
 | Time | `actualMin` per assignment | Checking off fills it with the estimate if empty, so one click still counts. Weekly consistency is approximated from completion dates. |
 | Curriculum | Imported as JSON, never hardcoded | The curriculum is written and refined outside the app. |
@@ -19,7 +20,9 @@ progress tracking. Each account has its own tracks, curriculum, and progress.
 Every row belongs to a user, and slugs, week numbers, and assignment keys are unique per user.
 
 - **User**, **Session**, **Account**, **Verification**: owned by Better Auth.
-- **Track**: slug, name, weekly target, `countsTowardStudy`, order. A new account gets five (`services/provision.ts`).
+- **Track**: slug, name, weekly target, `countsTowardStudy`, order. A new account gets five (`services/provision.ts`)
+  as a starting point. A track added in the app gets its slug from its name ("Public Speaking" becomes
+  `public-speaking`, or `public-speaking-2` if that is taken) and goes last in the order.
 - **PrepSettings**: one row per user holding the hours target (100), weekly target and stretch (180 / 240 min), and assessment cadence (4 weeks).
 - **Week**: `number` (always contiguous from 1), title, milestone, notes, `completedAt`.
 - **Assignment**: a stable `key`; content fields (title, description, objectives, estimate, resources); progress fields (status, `completedAt`, `actualMin`, confidence 1–5, notes); `isSupplementary`.
@@ -51,7 +54,7 @@ itself refuses an assignment whose week or track belongs to someone else.
 | `POST /api/prep/advance` | `{ carryOver: id[] }` completes the current week and moves the chosen unfinished assignments to the next |
 | `GET /api/prep/progress` | Planned vs. done, study vs. workplace minutes, per-track totals, last 12 calendar weeks |
 | `GET/PATCH /api/prep/settings` | Targets and cadence |
-| `/api/tracks` | List, create, update, delete (blocked while a track has assignments) |
+| `/api/tracks` | List, create (`slug` is optional and otherwise made from `name`), update, delete (blocked while a track has assignments) |
 | `/api/weeks` | List (with assignments), get, create (`number` inserts at that position), update (`completed: boolean` to close or reopen), delete |
 | `PUT /api/weeks/order` | `{ ids }`, every week in its new order |
 | `PUT /api/weeks/:id/assignments/order` | `{ ids }`, every assignment in the week in its new order |
@@ -64,6 +67,9 @@ itself refuses an assignment whose week or track belongs to someone else.
 ```json
 {
   "settings": { "targetHours": 100 },
+  "tracks": [
+    { "slug": "writing", "name": "Technical Writing", "weeklyTargetMin": 30 }
+  ],
   "weeks": [
     {
       "number": 1,
@@ -85,15 +91,22 @@ itself refuses an assignment whose week or track belongs to someone else.
 }
 ```
 
-Track slugs: `js-ts`, `cs`, `leetcode`, `system-design`, `agentic`.
+An assignment's `track` is a track's slug. A new account has `js-ts`, `cs`, `leetcode`,
+`system-design`, and `agentic`; the Curriculum screen shows the slug beside each track.
+`tracks` is optional and only needed for tracks the account doesn't have yet. Each takes a
+`slug` and `name`, and optionally `description`, `weeklyTargetMin`, and `countsTowardStudy`.
 
 **Merge rules.** Re-importing is safe at any point in the curriculum.
 
+- Tracks match by `slug`. One the account lacks is created; one it already has is left as it is.
 - Weeks match by `number`; omitted week fields are left unchanged.
 - Assignments match by `key`, and only content fields are written. Status, time, confidence, and notes are never touched, and an existing assignment stays in whatever week it has been moved to.
 - An assignment the file drops from a week it lists is deleted only if it has no progress; otherwise it is kept and reported.
 - Weeks the file does not mention, and assignments added in the app, are left alone.
 - Week numbers must stay contiguous, and keys must be unique across the file.
+
+**Export.** Every export lists all of the account's tracks, so a file can be imported into
+another account without setting its tracks up first.
 
 **Backups.** `export?progress=true` adds each assignment's `progress` (status, completion
 date, time, confidence, notes) and `isSupplementary`, and each week's `completedAt`. Importing

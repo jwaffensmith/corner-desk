@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   AssignmentCreate, AssignmentStatus, AssignmentUpdate, BookCreate, BookNoteCreate, BookNoteUpdate, BookUpdate,
-  EventCreate, EventStatus, EventUpdate, ProjectCreate, ProjectUpdate, Resource, TodoCreate, TodoUpdate, WeekCreate,
-  WeekUpdate,
+  EventCreate, EventStatus, EventUpdate, ProjectCreate, ProjectUpdate, Resource, TodoCreate, TodoUpdate, TrackCreate,
+  TrackUpdate, WeekCreate, WeekUpdate,
 } from "@cornerdesk/shared";
 
 export interface Track {
@@ -69,6 +69,7 @@ export interface Progress {
 export interface ImportResult {
   dryRun: boolean;
   plan: {
+    tracks: { create: string[] };
     weeks: { create: number[]; update: number[] };
     assignments: { create: string[]; update: string[]; remove: string[]; keep: string[] };
     settings: boolean;
@@ -175,6 +176,11 @@ async function destroy(path: string): Promise<boolean> {
   return true;
 }
 
+export const useCreateTrack = () => useApiMutation((body: TrackCreate) => api<Track>("/tracks", "POST", body));
+export const useUpdateTrack = () =>
+  useApiMutation(({ id, ...body }: TrackUpdate & { id: string }) => api<Track>(`/tracks/${id}`, "PATCH", body));
+export const useDeleteTrack = () => useApiMutation((id: string) => api(`/tracks/${id}`, "DELETE"));
+
 export function useUpdateAssignment() {
   const client = useQueryClient();
   return useMutation({
@@ -278,3 +284,6 @@ export function useUpdateBookNote() {
 
 export const formatMinutes = (min: number) =>
   min < 60 ? `${min} min` : `${Math.round((min / 60) * 10) / 10} h`;
+
+export const trackTarget = (track: Track) =>
+  !track.countsTowardStudy ? "During the workday" : track.weeklyTargetMin ? `${formatMinutes(track.weeklyTargetMin)} a week` : "";

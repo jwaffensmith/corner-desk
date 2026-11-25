@@ -12,6 +12,7 @@ import { AssignmentDrawer } from "./AssignmentDrawer";
 import { AssignmentForm } from "./AssignmentForm";
 import { AssignmentRow } from "./AssignmentRow";
 import { ImportDialog } from "./ImportDialog";
+import { Tracks } from "./Tracks";
 
 function moved<T>(list: T[], index: number, delta: -1 | 1): T[] | null {
   const target = index + delta;
@@ -63,6 +64,8 @@ export function Curriculum() {
           <Button onClick={() => createWeek.mutate({})}>Add week</Button>
         </Flex>
       </Flex>
+
+      <Tracks tracks={tracks.data} weeks={weeks.data} />
 
       {weeks.data.length === 0 && (
         <Card><Text>No weeks yet. Import a curriculum file, or add your first week.</Text></Card>

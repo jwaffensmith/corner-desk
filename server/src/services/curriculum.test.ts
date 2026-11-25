@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { curriculumSchema } from "@cornerdesk/shared";
+import { LIMITS, curriculumSchema } from "@cornerdesk/shared";
 import { planImport, type ExistingCurriculum } from "./curriculum.js";
 
 const file = (weeks: { number: number; keys: string[]; track?: string }[]) =>
@@ -54,6 +54,26 @@ describe("planImport", () => {
     );
   });
 
+  it("creates tracks the file lists that are missing, and accepts assignments on them", () => {
+    const withTracks = curriculumSchema.parse({
+      tracks: [{ slug: "writing", name: "Writing" }, { slug: "js-ts", name: "JS" }],
+      weeks: [{ number: 1, assignments: [{ key: "a", track: "writing", title: "A", estimatedMin: 45 }] }],
+    });
+    const plan = planImport(withTracks, existing([], []));
+    expect(plan.tracks).toEqual({ create: ["writing"] });
+    expect(plan.assignments.create).toEqual(["a"]);
+  });
+
+  it("rejects more tracks than an account can hold", () => {
+    const tooMany = curriculumSchema.parse({
+      tracks: Array.from({ length: LIMITS.tracks - 1 }, (_, i) => ({ slug: `t${i}`, name: `T${i}` })),
+      weeks: [],
+    });
+    expect(() => planImport(tooMany, existing([], []))).toThrow(
+      expect.objectContaining({ fields: { tracks: `You can have at most ${LIMITS.tracks} tracks` } }),
+    );
+  });
+
   it("rejects gaps in week numbers", () => {
     expect(() => planImport(file([{ number: 4, keys: [] }]), existing([]))).toThrow(
       expect.objectContaining({ fields: { weeks: "Week numbers must be contiguous; missing 3" } }),
@@ -71,5 +91,13 @@ describe("curriculumSchema", () => {
     });
     expect(result.success).toBe(false);
     expect(result.error?.issues.map((i) => i.message)).toEqual(['Duplicate week 1', 'Duplicate key "a"']);
+  });
+
+  it("rejects a track listed twice", () => {
+    const result = curriculumSchema.safeParse({
+      tracks: [{ slug: "writing", name: "Writing" }, { slug: "writing", name: "Writing again" }],
+      weeks: [],
+    });
+    expect(result.error?.issues.map((i) => i.message)).toEqual(['Duplicate track "writing"']);
   });
 });

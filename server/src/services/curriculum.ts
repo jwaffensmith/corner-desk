@@ -1,4 +1,4 @@
-import type { Curriculum, Resource } from "@cornerdesk/shared";
+import { LIMITS, type Curriculum, type Resource } from "@cornerdesk/shared";
 import { prisma } from "../db.js";
 import { HttpError } from "../lib/http.js";
 import { hasProgress } from "./assignments.js";
@@ -11,6 +11,7 @@ export interface ExistingCurriculum {
 }
 
 export interface ImportPlan {
+  tracks: { create: string[] };
   weeks: { create: number[]; update: number[] };
   assignments: { create: string[]; update: string[]; remove: string[]; keep: string[] };
   settings: boolean;
@@ -22,11 +23,17 @@ export interface ImportPlan {
 // A keyed assignment the file drops is removed only if it is untouched; weeks the file
 // does not mention, and assignments added by hand, are left alone. The exception is a
 // backup file: an assignment that carries a `progress` block has its progress restored.
+// Tracks the file lists are created if missing and otherwise left as they are.
 export function planImport(file: Curriculum, existing: ExistingCurriculum): ImportPlan {
   const errors: Record<string, string> = {};
+  const newTracks = (file.tracks ?? []).map((t) => t.slug).filter((slug) => !existing.trackSlugs.has(slug));
+  if (existing.trackSlugs.size + newTracks.length > LIMITS.tracks) {
+    errors["tracks"] = `You can have at most ${LIMITS.tracks} tracks`;
+  }
+  const knownTracks = new Set([...existing.trackSlugs, ...newTracks]);
   file.weeks.forEach((week, w) =>
     week.assignments.forEach((a, i) => {
-      if (!existing.trackSlugs.has(a.track)) {
+      if (!knownTracks.has(a.track)) {
         errors[`weeks.${w}.assignments.${i}.track`] = `Unknown track "${a.track}"`;
       }
     }),
@@ -48,6 +55,7 @@ export function planImport(file: Curriculum, existing: ExistingCurriculum): Impo
   );
 
   return {
+    tracks: { create: newTracks },
     weeks: {
       create: file.weeks.map((w) => w.number).filter((n) => !existingWeeks.has(n)),
       update: file.weeks.map((w) => w.number).filter((n) => existingWeeks.has(n)),
@@ -95,6 +103,12 @@ export async function importCurriculum(userId: string, file: Curriculum, dryRun:
         });
       }
 
+      const newTracks = (file.tracks ?? []).filter((t) => plan.tracks.create.includes(t.slug));
+      if (newTracks.length) {
+        const last = await tx.track.aggregate({ where: { userId }, _max: { sortOrder: true } });
+        const first = (last._max.sortOrder ?? -1) + 1;
+        await tx.track.createMany({ data: newTracks.map((t, i) => ({ ...t, userId, sortOrder: first + i })) });
+      }
       const trackIds = new Map(
         (await tx.track.findMany({ where: { userId }, select: { id: true, slug: true } })).map((t) => [t.slug, t.id]),
       );
@@ -124,8 +138,9 @@ export async function importCurriculum(userId: string, file: Curriculum, dryRun:
 }
 
 export async function exportCurriculum(userId: string, withProgress: boolean): Promise<Curriculum> {
-  const [settings, weeks] = await Promise.all([
+  const [settings, tracks, weeks] = await Promise.all([
     prisma.prepSettings.findUnique({ where: { userId } }),
+    prisma.track.findMany({ where: { userId }, orderBy: { sortOrder: "asc" } }),
     prisma.week.findMany({
       where: { userId },
       orderBy: { number: "asc" },
@@ -141,6 +156,13 @@ export async function exportCurriculum(userId: string, withProgress: boolean): P
           assessmentEvery: settings.assessmentEvery,
         }
       : undefined,
+    tracks: tracks.map((t) => ({
+      slug: t.slug,
+      name: t.name,
+      description: t.description,
+      weeklyTargetMin: t.weeklyTargetMin,
+      countsTowardStudy: t.countsTowardStudy,
+    })),
     weeks: weeks.map((w) => ({
       number: w.number,
       title: w.title,

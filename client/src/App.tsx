@@ -12,6 +12,8 @@ import { Networking } from "./networking/Networking";
 import { Todos } from "./todos/Todos";
 import { Portfolio } from "./portfolio/Portfolio";
 
+const PAGE_PX = [5, 5, 5, 6];
+
 const linkStyle = {
   color: "secondary", textDecoration: "none", py: [3, 3, 2], borderBottom: "2px solid transparent", whiteSpace: "nowrap",
   "&:hover": { color: "text" },
@@ -34,7 +36,7 @@ export function App() {
       <Box as="header" sx={{ borderBottom: "1px solid", borderColor: "border" }}>
         <Box
           sx={{
-            maxWidth: 880, mx: "auto", px: 4, display: "grid", alignItems: "center", columnGap: [3, 5, 2],
+            maxWidth: 1080, mx: "auto", px: PAGE_PX, display: "grid", alignItems: "center", columnGap: [3, 5, 2, 4],
             gridTemplateColumns: ["minmax(0, 1fr) auto", "minmax(0, 1fr) auto", "auto minmax(0, 1fr) auto"],
           }}
         >
@@ -48,7 +50,7 @@ export function App() {
           <Button variant="ghost" title={session.data.user.email} onClick={signOut} sx={{ whiteSpace: "nowrap" }}>Sign out</Button>
         </Box>
       </Box>
-      <Box as="main" sx={{ maxWidth: 880, mx: "auto", px: 4, py: 5 }}>
+      <Box as="main" sx={{ maxWidth: 1080, mx: "auto", px: PAGE_PX, py: 5 }}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/prep" element={<ThisWeek />} />
@@ -80,8 +82,8 @@ function MainNav() {
       ref={ref}
       aria-label="Main"
       sx={{
-        columnGap: [3, 4], fontSize: [0, 1], gridColumn: ["1 / -1", "1 / -1", "auto"], gridRow: [2, 2, "auto"],
-        minWidth: 0, mx: [-4, -4, 0], px: 4,
+        columnGap: [3, 4, 3, 6], fontSize: [0, 1], gridColumn: ["1 / -1", "1 / -1", "auto"], gridRow: [2, 2, "auto"],
+        minWidth: 0, mx: [-5, -5, 0], px: [5, 5, 4],
         overflowX: "auto", scrollPaddingInline: 16, scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" },
         maskImage: EDGE_FADE,
       }}

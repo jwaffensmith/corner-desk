@@ -228,16 +228,24 @@ model Book {
 }
 
 model BookNote {
-  id         String   @id @default(cuid())
+  id        String       @id @default(cuid())
   // userId is part of the foreign key, so a note's book always belongs to the same user.
-  userId     String
-  book       Book     @relation(fields: [bookId, userId], references: [id, userId], onDelete: Cascade)
-  bookId     String
-  text       String
-  location   String?
-  isTakeaway Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  userId    String
+  book      Book         @relation(fields: [bookId, userId], references: [id, userId], onDelete: Cascade)
+  bookId    String
+  text      String
+  location  String?
+  kind      BookNoteKind @default(NOTE)
+  // What the book said about a wondering. Set means answered.
+  answer    String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@index([bookId, createdAt])
+}
+
+enum BookNoteKind {
+  NOTE
+  TAKEAWAY
+  WONDERING
 }

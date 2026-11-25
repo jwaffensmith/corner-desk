@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
-  AssignmentCreate, AssignmentStatus, AssignmentUpdate, BookCreate, BookNoteCreate, BookNoteUpdate, BookUpdate,
-  EventCreate, EventStatus, EventUpdate, ProjectCreate, ProjectUpdate, Resource, TodoCreate, TodoUpdate, TrackCreate,
-  TrackUpdate, WeekCreate, WeekUpdate,
+  AssignmentCreate, AssignmentStatus, AssignmentUpdate, BookCreate, BookNoteCreate, BookNoteKind, BookNoteUpdate,
+  BookUpdate, EventCreate, EventStatus, EventUpdate, ProjectCreate, ProjectUpdate, Resource, TodoCreate, TodoUpdate,
+  TrackCreate, TrackUpdate, WeekCreate, WeekUpdate,
 } from "@cornerdesk/shared";
 
 export interface Track {
@@ -117,7 +117,8 @@ export interface BookNote {
   bookId: string;
   text: string;
   location: string | null;
-  isTakeaway: boolean;
+  kind: BookNoteKind;
+  answer: string | null;
 }
 
 export interface Book {
@@ -272,11 +273,11 @@ export function useUpdateBookNote() {
   return useMutation({
     mutationFn: ({ id, ...body }: BookNoteUpdate & { id: string }) =>
       api<BookNote>(`/reading/notes/${id}`, "PATCH", body),
-    onMutate: async ({ id, isTakeaway }) => {
-      if (isTakeaway === undefined) return;
+    onMutate: async ({ id, kind }) => {
+      if (kind === undefined) return;
       await client.cancelQueries({ queryKey: ["books"] });
       client.setQueryData<Book[]>(["books"], (books) =>
-        books?.map((b) => ({ ...b, notes: b.notes.map((n) => (n.id === id ? { ...n, isTakeaway } : n)) })));
+        books?.map((b) => ({ ...b, notes: b.notes.map((n) => (n.id === id ? { ...n, kind } : n)) })));
     },
     onSettled: () => client.invalidateQueries(),
   });

@@ -26,14 +26,14 @@ describe("reading", () => {
     const first = await addBook({ title: "Radical Candor", author: "Kim Scott" });
     await addBook({ title: "The Manager's Path" });
     await addNote(first.id, { text: "Care personally", location: "Ch. 1" });
-    await addNote(first.id, { text: "Challenge directly", isTakeaway: true });
+    await addNote(first.id, { text: "Challenge directly", kind: "TAKEAWAY" });
 
     const { body } = await api.get("/api/reading/books");
     expect(body.map((b: { title: string }) => b.title)).toEqual(["The Manager's Path", "Radical Candor"]);
     expect(body[0].notes).toEqual([]);
     expect(body[1].notes).toMatchObject([
-      { text: "Care personally", location: "Ch. 1", isTakeaway: false },
-      { text: "Challenge directly", location: null, isTakeaway: true },
+      { text: "Care personally", location: "Ch. 1", kind: "NOTE", answer: null },
+      { text: "Challenge directly", location: null, kind: "TAKEAWAY", answer: null },
     ]);
   });
 
@@ -61,11 +61,27 @@ describe("reading", () => {
     const book = await addBook({ title: "Radical Candor" });
     const note = await addNote(book.id, { text: "Praise in public", location: "p. 40" });
 
-    const res = await api.patch(`/api/reading/notes/${note.id}`).send({ isTakeaway: true, location: null });
-    expect(res.body).toMatchObject({ text: "Praise in public", location: null, isTakeaway: true });
+    const res = await api.patch(`/api/reading/notes/${note.id}`).send({ kind: "TAKEAWAY", location: null });
+    expect(res.body).toMatchObject({ text: "Praise in public", location: null, kind: "TAKEAWAY" });
 
     expect((await api.delete(`/api/reading/notes/${note.id}`)).status).toBe(204);
     expect((await api.get("/api/reading/books")).body[0].notes).toEqual([]);
+  });
+
+  it("files a wondering, then records the book's answer", async () => {
+    const book = await addBook({ title: "Radical Candor" });
+    const wondering = await addNote(book.id, { text: "Does this work remotely?", kind: "WONDERING" });
+    expect(wondering).toMatchObject({ kind: "WONDERING", answer: null });
+
+    const res = await api.patch(`/api/reading/notes/${wondering.id}`).send({ answer: " Yes, with more check-ins " });
+    expect(res.body).toMatchObject({ text: "Does this work remotely?", kind: "WONDERING", answer: "Yes, with more check-ins" });
+  });
+
+  it("rejects a kind it doesn't know", async () => {
+    const book = await addBook({ title: "Radical Candor" });
+    const res = await api.post(`/api/reading/books/${book.id}/notes`).send({ text: "Hm", kind: "QUESTION" });
+    expect(res.status).toBe(400);
+    expect(res.body.error.fields).toHaveProperty("kind");
   });
 
   it("deletes a book along with its notes, leaving the rest", async () => {

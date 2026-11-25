@@ -17,7 +17,7 @@ It runs on Render's free plan, so the first load after a quiet spell can take a 
 | This week, Curriculum | A self-paced study plan, imported as JSON, with time and confidence logged per assignment. Its learning tracks are yours to define: add, rename, or delete them on the Curriculum tab, or list new ones in the file you import | [example file](client/public/curriculum.example.json) |
 | Networking | Events you sign up for and attend, against a monthly goal | [docs/networking.md](docs/networking.md) |
 | Portfolio | Your projects and the improvements you want to make to each | [docs/portfolio.md](docs/portfolio.md) |
-| Reading | Notes and starred takeaways from the books you read | [docs/reading.md](docs/reading.md) |
+| Reading | Notes, starred takeaways, and open questions from the books you read | [docs/reading.md](docs/reading.md) |
 
 Each account has its own data. Sign-in is OAuth only (Google or GitHub), with an optional
 invite list.

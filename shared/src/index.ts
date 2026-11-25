@@ -177,10 +177,14 @@ export const bookCreateSchema = z.object({
 });
 export const bookUpdateSchema = bookCreateSchema.partial();
 
+export const bookNoteKindEnum = z.enum(["NOTE", "TAKEAWAY", "WONDERING"]);
+export type BookNoteKind = z.infer<typeof bookNoteKindEnum>;
+
 export const bookNoteCreateSchema = z.object({
   text: nonEmpty,
   location: optText,
-  isTakeaway: z.boolean().optional(),
+  kind: bookNoteKindEnum.optional(),
+  answer: optText,
 });
 export const bookNoteUpdateSchema = bookNoteCreateSchema.partial();
 

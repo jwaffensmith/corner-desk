@@ -1,10 +1,12 @@
 import { useId, useState, type FormEvent } from "react";
-import { Box, Button, Card, Flex, Grid, Heading, Input, Label, Text } from "theme-ui";
+import { Box, Button, Card, Flex, Grid, Heading, Input, Text } from "theme-ui";
+import type { BookNoteKind } from "@cornerdesk/shared";
 import { type Book, type BookNote, errorMessage, useBooks, useCreateBookNote, useUpdateBookNote } from "../api";
 import { Loading } from "../components/Loading";
 import { RowButton } from "../components/RowButton";
 import { TextArea } from "../components/TextArea";
 import { BookDialog } from "./BookDialog";
+import { KindPicker } from "./KindPicker";
 import { NoteDialog } from "./NoteDialog";
 
 export function Reading() {
@@ -47,8 +49,11 @@ interface CardProps {
 }
 
 function BookCard({ book: b, onEdit, onOpenNote }: CardProps) {
-  const takeaways = b.notes.filter((n) => n.isTakeaway);
-  const notes = b.notes.filter((n) => !n.isTakeaway).reverse();
+  const takeaways = b.notes.filter((n) => n.kind === "TAKEAWAY");
+  const notes = b.notes.filter((n) => n.kind === "NOTE").reverse();
+  const wonderings = b.notes.filter((n) => n.kind === "WONDERING").reverse();
+  const open = wonderings.filter((n) => !n.answer);
+  const answered = wonderings.filter((n) => n.answer);
 
   return (
     <Card as="section" aria-labelledby={`book-${b.id}`} sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -64,14 +69,22 @@ function BookCard({ book: b, onEdit, onOpenNote }: CardProps) {
 
       {b.notes.length > 0 && (
         <Grid columns={[1, 1, "3fr 2fr"]} gap={[4, 4, 5]} sx={{ alignItems: "start" }}>
+          <Flex sx={{ flexDirection: "column", gap: 4, minWidth: 0, order: [0, 0, 1] }}>
+            <NoteList title="Takeaways" notes={takeaways} empty="Star a note to keep it here." onOpen={onOpenNote} />
+            <NoteList
+              title="Wonderings"
+              count={answered.length > 0 ? `${open.length} open` : undefined}
+              notes={[...open, ...answered]}
+              empty="File a question here, then come back once the book answers it."
+              onOpen={onOpenNote}
+            />
+          </Flex>
           <NoteList
-            title="Takeaways"
-            notes={takeaways}
-            empty="Star a note to keep it here."
+            title="Notes"
+            notes={notes}
+            empty={takeaways.length > 0 ? "Every note is a takeaway." : "No notes yet."}
             onOpen={onOpenNote}
-            sx={{ order: [0, 0, 1] }}
           />
-          <NoteList title="Notes" notes={notes} empty="Every note is a takeaway." onOpen={onOpenNote} />
         </Grid>
       )}
     </Card>
@@ -80,19 +93,18 @@ function BookCard({ book: b, onEdit, onOpenNote }: CardProps) {
 
 interface ListProps {
   title: string;
+  count?: string;
   notes: BookNote[];
   empty: string;
   onOpen: (id: string) => void;
-  // Where an `sx` set on this component arrives.
-  className?: string;
 }
 
-function NoteList({ title, notes, empty, onOpen, className }: ListProps) {
+function NoteList({ title, count, notes, empty, onOpen }: ListProps) {
   const id = useId();
   return (
-    <Box as="section" aria-labelledby={id} className={className} sx={{ minWidth: 0 }}>
+    <Box as="section" aria-labelledby={id} sx={{ minWidth: 0 }}>
       <Heading as="h3" id={id} sx={{ fontSize: 2 }}>
-        {title} <Text variant="meta" sx={{ fontFamily: "body", fontWeight: "body" }}>({notes.length})</Text>
+        {title} <Text variant="meta" sx={{ fontFamily: "body", fontWeight: "body" }}>({count ?? notes.length})</Text>
       </Heading>
       {notes.length === 0 ? (
         <Text variant="meta" sx={{ display: "block", mt: 2 }}>{empty}</Text>
@@ -107,19 +119,38 @@ function NoteList({ title, notes, empty, onOpen, className }: ListProps) {
 
 function NoteRow({ note: n, onOpen }: { note: BookNote; onOpen: () => void }) {
   const update = useUpdateBookNote();
+  const starred = n.kind === "TAKEAWAY";
   return (
     <Flex as="li" sx={{ alignItems: "start", gap: 1, py: 2, borderTop: "1px solid", borderColor: "muted" }}>
-      <Button
-        variant="ghost"
-        aria-label="Takeaway"
-        aria-pressed={n.isTakeaway}
-        title={n.isTakeaway ? "Move back to notes" : "Mark as a takeaway"}
-        onClick={() => update.mutate({ id: n.id, isTakeaway: !n.isTakeaway })}
-        sx={{ flexShrink: 0, width: 32, height: 32, p: 0, fontSize: 2, lineHeight: 1, color: n.isTakeaway ? "accent" : "secondary" }}
-      >
-        {n.isTakeaway ? "★" : "☆"}
-      </Button>
-      <RowButton title={n.text} meta={n.location} onClick={onOpen} />
+      {n.kind === "WONDERING" ? (
+        <RowButton
+          title={n.text}
+          dimmed={!!n.answer}
+          meta={n.answer ? (
+            <>
+              {n.location}
+              <Text sx={{ display: "block", fontSize: 1, color: "text", whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
+                Answer: {n.answer}
+              </Text>
+            </>
+          ) : n.location}
+          onClick={onOpen}
+        />
+      ) : (
+        <>
+          <Button
+            variant="ghost"
+            aria-label="Takeaway"
+            aria-pressed={starred}
+            title={starred ? "Move back to notes" : "Mark as a takeaway"}
+            onClick={() => update.mutate({ id: n.id, kind: starred ? "NOTE" : "TAKEAWAY" })}
+            sx={{ flexShrink: 0, width: 32, height: 32, p: 0, fontSize: 2, lineHeight: 1, color: starred ? "accent" : "secondary" }}
+          >
+            {starred ? "★" : "☆"}
+          </Button>
+          <RowButton title={n.text} meta={n.location} onClick={onOpen} />
+        </>
+      )}
     </Flex>
   );
 }
@@ -128,16 +159,16 @@ function AddNote({ book }: { book: Book }) {
   const create = useCreateBookNote();
   const [text, setText] = useState("");
   const [location, setLocation] = useState("");
-  const [isTakeaway, setIsTakeaway] = useState(false);
+  const [kind, setKind] = useState<BookNoteKind>("NOTE");
+  const wondering = kind === "WONDERING";
 
   function submit(e: FormEvent) {
     e.preventDefault();
     if (create.isPending) return;
     e.currentTarget.querySelector("textarea")?.focus();
     create.mutate(
-      { bookId: book.id, text, location: location.trim() || null, isTakeaway },
-      // The chapter stays filled in for the next note from the same place.
-      { onSuccess: () => { setText(""); setIsTakeaway(false); } },
+      { bookId: book.id, text, location: location.trim() || null, kind },
+      { onSuccess: () => { setText(""); setLocation(""); setKind("NOTE"); } },
     );
   }
 
@@ -146,8 +177,8 @@ function AddNote({ book }: { book: Book }) {
       <TextArea
         required
         rows={2}
-        aria-label={`Add a note to ${book.title}`}
-        placeholder="Jot a note"
+        aria-label={`Add a ${wondering ? "wondering" : "note"} to ${book.title}`}
+        placeholder={wondering ? "What are you wondering?" : "Jot a note"}
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
@@ -162,12 +193,9 @@ function AddNote({ book }: { book: Book }) {
           onChange={(e) => setLocation(e.target.value)}
           sx={{ flex: "1 1 180px", maxWidth: 260 }}
         />
-        <Label sx={{ width: "auto", gap: 2, alignItems: "center", fontSize: 1, color: "text", fontWeight: "body", m: 0 }}>
-          <input type="checkbox" checked={isTakeaway} onChange={(e) => setIsTakeaway(e.target.checked)} />
-          Takeaway
-        </Label>
+        <KindPicker value={kind} onChange={setKind} />
         <Button type="submit" variant="secondary" disabled={create.isPending} title="Ctrl or ⌘ + Enter" sx={{ ml: "auto" }}>
-          Add note
+          {wondering ? "Add wondering" : "Add note"}
         </Button>
       </Flex>
       {create.isError && <Text role="alert" sx={{ color: "alert" }}>{errorMessage(create.error)}</Text>}

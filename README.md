@@ -22,6 +22,10 @@ It runs on Render's free plan, so the first load after a quiet spell can take a 
 Each account has its own data. Sign-in is OAuth only (Google or GitHub), with an optional
 invite list.
 
+## Coming soon
+
+AI-powered features are on the way.
+
 ## Stack
 
 TypeScript throughout, in three npm workspaces:
